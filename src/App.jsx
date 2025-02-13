@@ -9,13 +9,14 @@ function App() {
   const [annotationData, setAnnotationData] = useState([]);
   const [imagesToAnnotate, setImagesToAnnotate] = useState([]);
   
+  const base = import.meta.env.BASE_URL;
 
   // 이미지 가져오기 (import.meta.glob())
   const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', { eager: true });
 
   const wholeImages = Object.keys(images).map((path) => {
     const fileName = path.split('/').pop(); // 파일명만 추출
-    return `public/images/${fileName}`;
+    return `${base}assets/images/${fileName}`;
   });
 
   const getRandomImages = (wholeImages, count = 5) => {
@@ -23,12 +24,12 @@ function App() {
     return shuffled.slice(0, count);
   };
 
-  // ✅ `useEffect`를 사용하여 첫 렌더링 시 한 번만 실행
+
   useEffect(() => {
     if (wholeImages.length > 0) {
       setImagesToAnnotate(getRandomImages(wholeImages));
     }
-  }, []); // ✅ 빈 배열 `[]`로 설정하여 **한 번만 실행**됨
+  }, []);
   
 
   // 구글 Apps Script 웹 앱 URL (배포 후 발급받은 URL)
