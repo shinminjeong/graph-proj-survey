@@ -12,12 +12,20 @@ function App() {
   const base = import.meta.env.BASE_URL;
 
   // 이미지 가져오기 (import.meta.glob())
-  const images = import.meta.glob('./src/assets/images/*.{png,jpg,jpeg,svg}', { eager: true });
+  // const images = import.meta.glob('./src/assets/images/*.{png,jpg,jpeg,svg}', { eager: true });
 
-  const wholeImages = Object.keys(images).map((path) => {
-    const fileName = path.split('/').pop();
-    return `${import.meta.env.BASE_URL}assets/${fileName}`;
+  // const wholeImages = Object.keys(images).map((path) => {
+  //   const fileName = path.split('/').pop();
+  //   return `${import.meta.env.BASE_URL}assets/${fileName}`;
+  // });
+
+  const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', {
+    eager: true
   });
+  
+  // 2) 실제 빌드 후 사용할 수 있는 URL만 추출
+  const wholeImages = Object.values(images).map((module) => module.default);
+
 
   const getRandomImages = (wholeImages, count = 5) => {
     const shuffled = [...wholeImages].sort(() => 0.5 - Math.random());
