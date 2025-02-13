@@ -15,8 +15,8 @@ function App() {
   const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', { eager: true });
 
   const wholeImages = Object.keys(images).map((path) => {
-    const fileName = path.split('/').pop(); // 파일명만 추출
-    return `${base}assets/images/${fileName}`;
+    const fileName = path.split('/').pop();
+    return `${import.meta.env.BASE_URL}assets/images/${fileName}`;
   });
 
   const getRandomImages = (wholeImages, count = 5) => {
