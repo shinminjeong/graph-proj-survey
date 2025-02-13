@@ -19,7 +19,7 @@ function App() {
   //   return `${import.meta.env.BASE_URL}assets/${fileName}`;
   // });
 
-  const images = import.meta.glob('./src/assets/images/*.{png,jpg,jpeg,svg}', {
+  const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', {
     eager: true
   });
   
