@@ -1,194 +1,164 @@
 import React, { useState, useRef } from 'react';
 
 function AnnotateScreen({
-    images,
-    onFinish,
-    annotationData,
-    setAnnotationData,
+  images,
+  onFinish,
+  annotationData,
+  setAnnotationData,
 }) {
-    const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-    // 드래그 상태
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
-    const [currentPoint, setCurrentPoint] = useState({ x: 0, y: 0 });
-    const [tempBox, setTempBox] = useState(null); // 드래그 중 임시 박스
+  // 드래그 상태
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
+  const [currentPoint, setCurrentPoint] = useState({ x: 0, y: 0 });
+  const [tempBox, setTempBox] = useState(null); // 드래그 중 임시 박스
 
-    const [currentImgSrc, setCurrentImgSrc] = useState(images[0]);
-    const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const containerRef = useRef(null);
 
-    useEffect(() => {
-        setIsImageLoaded(false);
-        setCurrentImgSrc(images[currentIndex]);
-    }, [currentIndex, images]);
+  const handleMouseDown = (e) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
+    setIsDrawing(true);
+    setStartPoint({ x, y });
+    setCurrentPoint({ x, y });
+  };
 
-    const containerRef = useRef(null);
+  const handleMouseMove = (e) => {
+    if (!isDrawing || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-    const handleMouseDown = (e) => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+    setCurrentPoint({ x, y });
 
-        setIsDrawing(true);
-        setStartPoint({ x, y });
-        setCurrentPoint({ x, y });
+    const left = Math.min(startPoint.x, x);
+    const top = Math.min(startPoint.y, y);
+    const width = Math.abs(x - startPoint.x);
+    const height = Math.abs(y - startPoint.y);
+
+    setTempBox({ left, top, width, height });
+  };
+
+  const handleMouseUp = () => {
+    if (!isDrawing || !tempBox) return;
+    setIsDrawing(false);
+
+    const currentImgSrc = images[currentIndex];
+    const newBox = {
+      x: tempBox.left,
+      y: tempBox.top,
+      w: tempBox.width,
+      h: tempBox.height,
     };
 
-    const handleMouseMove = (e) => {
-        if (!isDrawing || !containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+    // annotationData에서 해당 이미지의 boxes를 업데이트
+    setAnnotationData((prev) => {
+      // 현재 이미지에 대한 기존 데이터
+      const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
 
-        setCurrentPoint({ x, y });
-
-        const left = Math.min(startPoint.x, x);
-        const top = Math.min(startPoint.y, y);
-        const width = Math.abs(x - startPoint.x);
-        const height = Math.abs(y - startPoint.y);
-
-        setTempBox({ left, top, width, height });
-    };
-
-    const handleMouseUp = () => {
-        if (!isDrawing || !tempBox) return;
-        setIsDrawing(false);
-
-        const currentImgSrc = images[currentIndex];
-        const newBox = {
-            x: tempBox.left,
-            y: tempBox.top,
-            w: tempBox.width,
-            h: tempBox.height,
-        };
-
-        // annotationData에서 해당 이미지의 boxes를 업데이트
-        setAnnotationData((prev) => {
-            // 현재 이미지에 대한 기존 데이터
-            const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
-
-            if (exist) {
-                // 존재하면 그 boxes에 push
-                return prev.map((anno) => {
-                    if (anno.imgSrc === currentImgSrc) {
-                        return {
-                            ...anno,
-                            boxes: [...anno.boxes, newBox],
-                        };
-                    }
-                    return anno;
-                });
-            } else {
-                // 없으면 새로 생성
-                return [
-                    ...prev,
-                    {
-                        imgSrc: currentImgSrc,
-                        boxes: [newBox],
-                    },
-                ];
-            }
+      if (exist) {
+        // 존재하면 그 boxes에 push
+        return prev.map((anno) => {
+          if (anno.imgSrc === currentImgSrc) {
+            return {
+              ...anno,
+              boxes: [...anno.boxes, newBox],
+            };
+          }
+          return anno;
         });
+      } else {
+        // 없으면 새로 생성
+        return [
+          ...prev,
+          {
+            imgSrc: currentImgSrc,
+            boxes: [newBox],
+          },
+        ];
+      }
+    });
 
-        setTempBox(null);
-    };
+    setTempBox(null);
+  };
 
-    // "다음" 버튼
-    const handleNextImage = () => {
-        if (currentIndex === images.length - 1) {
-            // 마지막 이미지라면 onFinish() 호출
-            onFinish();
-        } else {
-            setCurrentIndex((prev) => prev + 1);
-        }
-    };
+  // "다음" 버튼
+  const handleNextImage = () => {
+    if (currentIndex === images.length - 1) {
+      // 마지막 이미지라면 onFinish() 호출
+      onFinish();
+    } else {
+      setCurrentIndex((prev) => prev + 1);
+    }
+  };
 
+  const currentImgSrc = images[currentIndex];
+  const currentAnno = annotationData.find((anno) => anno.imgSrc === currentImgSrc);
+  const existingBoxes = currentAnno ? currentAnno.boxes : [];
 
-    const handleImageLoad = () => {
-        setIsImageLoaded(true);
-    };
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <h2>
+        이미지 {currentIndex + 1} / {images.length}
+      </h2>
 
-    const handleImageError = () => {
-        setIsImageLoaded(false);
-        console.error("이미지를 불러오는데 실패했습니다.", currentImgSrc);
-    };
-
-    //   const currentImgSrc = images[currentIndex];
-    const currentAnno = annotationData.find((anno) => anno.imgSrc === currentImgSrc);
-    const existingBoxes = currentAnno ? currentAnno.boxes : [];
-
-    return (
-        <div style={{ textAlign: 'center' }}>
-            <h2>
-                이미지 {currentIndex + 1} / {images.length}
-            </h2>
-
-            <div
-                ref={containerRef}
-                style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    cursor: 'crosshair',
-                }}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-            >
-                <div>
-                    {!isImageLoaded && <p>이미지 로딩 중...</p>}
-                    <img
-                        key={currentImgSrc} // 강제 리렌더링
-                        src={currentImgSrc}
-                        alt={`img-${currentIndex}`}
-                        onLoad={handleImageLoad}
-                        onError={handleImageError}
-                        style={{ maxWidth: "600px", maxHeight: "400px", display: isImageLoaded ? "block" : "none" }}
-                    />
-                </div>
-                {/* <img
+      <div
+        ref={containerRef}
+        style={{
+          position: 'relative',
+          display: 'inline-block',
+          cursor: 'crosshair',
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        <img
           src={currentImgSrc}
           alt={`img-${currentIndex}`}
           style={{ maxWidth: '600px', maxHeight: '400px' }}
-        /> */}
+        />
 
-                {/* 이미 그린 박스 표시 */}
-                {existingBoxes.map((box, idx) => (
-                    <div
-                        key={idx}
-                        style={{
-                            position: 'absolute',
-                            border: '2px solid red',
-                            left: box.x,
-                            top: box.y,
-                            width: box.w,
-                            height: box.h,
-                        }}
-                    />
-                ))}
+        {/* 이미 그린 박스 표시 */}
+        {existingBoxes.map((box, idx) => (
+          <div
+            key={idx}
+            style={{
+              position: 'absolute',
+              border: '2px solid red',
+              left: box.x,
+              top: box.y,
+              width: box.w,
+              height: box.h,
+            }}
+          />
+        ))}
 
-                {/* 드래그 중 임시 박스 표시 */}
-                {isDrawing && tempBox && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            border: '2px dashed blue',
-                            left: tempBox.left,
-                            top: tempBox.top,
-                            width: tempBox.width,
-                            height: tempBox.height,
-                        }}
-                    />
-                )}
-            </div>
+        {/* 드래그 중 임시 박스 표시 */}
+        {isDrawing && tempBox && (
+          <div
+            style={{
+              position: 'absolute',
+              border: '2px dashed blue',
+              left: tempBox.left,
+              top: tempBox.top,
+              width: tempBox.width,
+              height: tempBox.height,
+            }}
+          />
+        )}
+      </div>
 
-            <br />
-            <button onClick={handleNextImage}>
-                {currentIndex === images.length - 1 ? '완료' : '다음'}
-            </button>
-        </div>
-    );
+      <br />
+      <button onClick={handleNextImage}>
+        {currentIndex === images.length - 1 ? '완료' : '다음'}
+      </button>
+    </div>
+  );
 }
 
 export default AnnotateScreen;
