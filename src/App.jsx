@@ -11,7 +11,7 @@ function App() {
   
   const base = import.meta.env.BASE_URL;
 
-  const images = import.meta.glob('./src/assets/images/*.{png,jpg,jpeg,svg}', {
+  const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', {
     eager: true
   });
   
