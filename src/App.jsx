@@ -16,7 +16,7 @@ function App() {
 
   const wholeImages = Object.keys(images).map((path) => {
     const fileName = path.split('/').pop();
-    return `${base}/assets/${fileName}`;
+    return `${import.meta.env.BASE_URL}assets/${fileName}`;
   });
 
   const getRandomImages = (wholeImages, count = 5) => {
