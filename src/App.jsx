@@ -11,15 +11,7 @@ function App() {
   
   const base = import.meta.env.BASE_URL;
 
-  // 이미지 가져오기 (import.meta.glob())
-  // const images = import.meta.glob('./src/assets/images/*.{png,jpg,jpeg,svg}', { eager: true });
-
-  // const wholeImages = Object.keys(images).map((path) => {
-  //   const fileName = path.split('/').pop();
-  //   return `${import.meta.env.BASE_URL}assets/${fileName}`;
-  // });
-
-  const images = import.meta.glob('./src/assets/images/*.{png,jpg,jpeg,svg}', {
+  const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', {
     eager: true
   });
   
