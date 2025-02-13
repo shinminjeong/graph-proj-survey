@@ -29,7 +29,7 @@ function App() {
     if (wholeImages.length > 0) {
       setImagesToAnnotate(getRandomImages(wholeImages));
     }
-  }, [wholeImages]);
+  }, []);
   
 
   // 구글 Apps Script 웹 앱 URL (배포 후 발급받은 URL)
