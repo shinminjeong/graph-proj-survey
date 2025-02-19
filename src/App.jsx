@@ -82,7 +82,7 @@ function App() {
                     {/* isSending이 true면 ProgressBar를 AnnotateScreen 위에 표시 */}
                     {isSending && (
                         <div style={{ textAlign: 'center', margin: '0 auto 20px' }}>
-                            <p>데이터 전송 중입니다...</p>
+                            <p>Sending Data Now...</p>
                             <progress />
                         </div>
                     )}
