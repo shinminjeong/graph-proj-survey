@@ -60,13 +60,17 @@ function AnnotateScreen({
       // 현재 이미지에 대한 기존 데이터
       const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
 
+      console.log('current index : ', currentIndex);
+      console.log('annotationData', annotationData);
+      console.log('annotationData length', annotationData.length);
+
       if (exist) {
-        // 존재하면 그 boxes에 push
         return prev.map((anno) => {
           if (anno.imgSrc === currentImgSrc) {
             return {
               ...anno,
-              boxes: [...anno.boxes, newBox],
+              // boxes: [...anno.boxes, newBox],
+              boxes: [newBox],
             };
           }
           return anno;
@@ -88,6 +92,11 @@ function AnnotateScreen({
 
   // "다음" 버튼
   const handleNextImage = () => {
+    console.log('current index : ', currentIndex);
+    console.log('annotationData', annotationData);
+    console.log('annotationData length', annotationData.length);
+
+
     if (currentIndex === images.length - 1) {
       // 마지막 이미지라면 onFinish() 호출
       onFinish();
@@ -103,7 +112,7 @@ function AnnotateScreen({
   return (
     <div style={{ textAlign: 'center' }}>
       <h2>
-        이미지 {currentIndex + 1} / {images.length}
+        Image {currentIndex + 1} / {images.length}
       </h2>
 
       <div
@@ -154,7 +163,7 @@ function AnnotateScreen({
       </div>
 
       <br />
-      <button onClick={handleNextImage}>
+      <button onClick={handleNextImage} disabled={1 !== existingBoxes.length}>
         {currentIndex === images.length - 1 ? '완료' : '다음'}
       </button>
     </div>
