@@ -11,8 +11,10 @@ function AnnotateScreen({
   // 드래그 상태
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
-  const [currentPoint, setCurrentPoint] = useState({ x: 0, y: 0 });
   const [tempBox, setTempBox] = useState(null); // 드래그 중 임시 박스
+
+  // 텍스트 입력
+  const [textInput, setTextInput] = useState('');
 
   const containerRef = useRef(null);
 
@@ -24,7 +26,6 @@ function AnnotateScreen({
 
     setIsDrawing(true);
     setStartPoint({ x, y });
-    setCurrentPoint({ x, y });
   };
 
   const handleMouseMove = (e) => {
@@ -32,8 +33,6 @@ function AnnotateScreen({
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
-    setCurrentPoint({ x, y });
 
     const left = Math.min(startPoint.x, x);
     const top = Math.min(startPoint.y, y);
@@ -44,7 +43,7 @@ function AnnotateScreen({
   };
 
   const handleMouseUp = () => {
-    if (!isDrawing || !tempBox) return;
+    if (!isDrawing || !tempBox || !containerRef.current) return;
     setIsDrawing(false);
 
     const currentImgSrc = images[currentIndex];
@@ -55,26 +54,15 @@ function AnnotateScreen({
       h: tempBox.height,
     };
 
-    // annotationData에서 해당 이미지의 boxes를 업데이트
+    // 기존 annotationData 복사 후 업데이트
     setAnnotationData((prev) => {
-      // 현재 이미지에 대한 기존 데이터
       const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
-
-      console.log('current index : ', currentIndex);
-      console.log('annotationData', annotationData);
-      console.log('annotationData length', annotationData.length);
-
       if (exist) {
-        return prev.map((anno) => {
-          if (anno.imgSrc === currentImgSrc) {
-            return {
-              ...anno,
-              // boxes: [...anno.boxes, newBox],
-              boxes: [newBox],
-            };
-          }
-          return anno;
-        });
+        return prev.map((anno) =>
+          anno.imgSrc === currentImgSrc
+            ? { ...anno, boxes: [newBox] } // 박스를 하나만 유지하는 예시
+            : anno
+        );
       } else {
         // 없으면 새로 생성
         return [
@@ -82,6 +70,7 @@ function AnnotateScreen({
           {
             imgSrc: currentImgSrc,
             boxes: [newBox],
+            // text는 handleNextImage에서 추가
           },
         ];
       }
@@ -90,16 +79,36 @@ function AnnotateScreen({
     setTempBox(null);
   };
 
-  // "다음" 버튼
   const handleNextImage = () => {
-    console.log('current index : ', currentIndex);
-    console.log('annotationData', annotationData);
-    console.log('annotationData length', annotationData.length);
+    const currentImgSrc = images[currentIndex];
+
+    const newAnnotationData = (() => {
+      const cloned = [...annotationData];
+      const index = cloned.findIndex((anno) => anno.imgSrc === currentImgSrc);
+
+      if (index !== -1) {
+        cloned[index] = {
+          ...cloned[index],
+          text: textInput,
+        };
+      } else {
+        cloned.push({
+          imgSrc: currentImgSrc,
+          boxes: [],
+          text: textInput,
+        });
+      }
+
+      return cloned;
+    })();
 
 
+    setAnnotationData(newAnnotationData);
+    setTextInput('');
+
+    // 마지막 이미지인지
     if (currentIndex === images.length - 1) {
-      // 마지막 이미지라면 onFinish() 호출
-      onFinish();
+      onFinish(newAnnotationData);
     } else {
       setCurrentIndex((prev) => prev + 1);
     }
@@ -107,65 +116,88 @@ function AnnotateScreen({
 
   const currentImgSrc = images[currentIndex];
   const currentAnno = annotationData.find((anno) => anno.imgSrc === currentImgSrc);
-  const existingBoxes = currentAnno ? currentAnno.boxes : [];
+  const existingBoxes = currentAnno?.boxes || [];
 
   return (
     <div style={{ textAlign: 'center' }}>
       <h2>
-        Image {currentIndex + 1} / {images.length}
+        Brush the most prominent region in the chart ({currentIndex + 1} / {images.length})
       </h2>
 
-      <div
-        ref={containerRef}
-        style={{
-          position: 'relative',
-          display: 'inline-block',
-          cursor: 'crosshair',
-        }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      >
-        <img
-          src={currentImgSrc}
-          alt={`img-${currentIndex}`}
-          style={{ maxWidth: '600px', maxHeight: '400px' }}
+      <div style={{ display: 'inline-flex', gap: '20px', justifyContent: 'center' }}>
+        {/* 이미지 + 박스 영역 */}
+        <div
+          ref={containerRef}
+          style={{
+            position: 'relative',
+            display: 'inline-block',
+            cursor: 'crosshair',
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+        >
+          {/* <img
+            src={currentImgSrc}
+            alt={`img-${currentIndex}`}
+            style={{ maxWidth: '600px', maxHeight: '400px' }}
+          /> */}
+          <img
+            src={currentImgSrc}
+            alt={`img-${currentIndex}`}
+            style={{ maxWidth: '600px', height: '400px', userSelect: 'none', pointerEvents: 'none' }}
+            onContextMenu={(e) => e.preventDefault()} // 우클릭 방지
+            onDragStart={(e) => e.preventDefault()} // 드래그 방지
+          />
+
+
+
+          {/* 이미 그린 박스 표시 */}
+          {existingBoxes.map((box, idx) => (
+            <div
+              key={idx}
+              style={{
+                position: 'absolute',
+                border: '2px solid red',
+                left: box.x,
+                top: box.y,
+                width: box.w,
+                height: box.h,
+              }}
+            />
+          ))}
+
+          {/* 드래그 중 임시 박스 표시 */}
+          {isDrawing && tempBox && (
+            <div
+              style={{
+                position: 'absolute',
+                border: '2px dashed blue',
+                left: tempBox.left,
+                top: tempBox.top,
+                width: tempBox.width,
+                height: tempBox.height,
+              }}
+            />
+          )}
+        </div>
+
+        {/* 텍스트 입력 영역 */}
+        <textarea
+          style={{ width: '250px', height: '380px', fontSize: '14px', padding: '8px', resize: 'none' }}
+          placeholder="Enter your additional comments here..."
+          value={textInput}
+          onChange={(e) => setTextInput(e.target.value)}
         />
-
-        {/* 이미 그린 박스 표시 */}
-        {existingBoxes.map((box, idx) => (
-          <div
-            key={idx}
-            style={{
-              position: 'absolute',
-              border: '2px solid red',
-              left: box.x,
-              top: box.y,
-              width: box.w,
-              height: box.h,
-            }}
-          />
-        ))}
-
-        {/* 드래그 중 임시 박스 표시 */}
-        {isDrawing && tempBox && (
-          <div
-            style={{
-              position: 'absolute',
-              border: '2px dashed blue',
-              left: tempBox.left,
-              top: tempBox.top,
-              width: tempBox.width,
-              height: tempBox.height,
-            }}
-          />
-        )}
       </div>
 
       <br />
-      <button onClick={handleNextImage} disabled={1 !== existingBoxes.length}>
-        {currentIndex === images.length - 1 ? '완료' : '다음'}
+      <button onClick={handleNextImage} disabled={(existingBoxes.length !== 1)}>
+        {currentIndex === images.length - 1 ? 'Finish' : 'Next'}
       </button>
+      {/* <button onClick={handleNextImage} disabled={(existingBoxes.length !== 1 || textInput === '')}>
+        {currentIndex === images.length - 1 ? 'Finish' : 'Next'}
+      </button> */}
     </div>
   );
 }
