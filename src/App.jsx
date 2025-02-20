@@ -10,6 +10,8 @@ function App() {
     const [imagesToAnnotate, setImagesToAnnotate] = useState([]);
     const [isSending, setIsSending] = useState(false); // 전송 중 여부
 
+    const [userId, setUserId] = useState('');
+
     const base = import.meta.env.BASE_URL;
     const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', {
         eager: true
@@ -34,7 +36,7 @@ function App() {
         'https://script.google.com/macros/s/AKfycbyN50ItId7fBzUh9o3dmdePHUikxQOlT_qHZJiAKz14uUfpQnHCag0PGtInV65v8ODq/exec';
 
     // 사용자를 식별하고 싶다면 userId를 받을 수도 있음
-    const userId = '익명 사용자';
+    // const userId = '익명 사용자';
 
     const handleStart = () => {
         setScreen('annotate');
@@ -68,14 +70,14 @@ function App() {
         } catch (err) {
             // 에러 발생 시
             console.error('Error sending data to Google Sheets:', err);
-            alert('데이터 전송에 실패했습니다.');
+            alert('Failed to send data.');
             setIsSending(false);
         }
     };
 
     return (
         <div className='app-container'>
-            {screen === 'start' && <StartScreen onStart={handleStart} />}
+            {screen === 'start' && <StartScreen onStart={handleStart} userId={userId} setUserId={setUserId}/>}
 
             {screen === 'annotate' && (
                 <>
