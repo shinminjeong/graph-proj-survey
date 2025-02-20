@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 function AnnotateScreen({
   images,
@@ -18,8 +18,48 @@ function AnnotateScreen({
 
   const containerRef = useRef(null);
 
+  useEffect(() => {
+    if (!images || !images[currentIndex]) return;
+
+    const currentImgSrc = images[currentIndex];
+    const now = Date.now(); // or new Date().toISOString() 등 원하는 형식
+
+    setAnnotationData((prev) => {
+      const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
+
+      // 이미 이 이미지에 대한 정보가 있고, image_up_timestamp가 없다면 추가
+      if (exist && !exist.image_up_timestamp) {
+        return prev.map((anno) => {
+          if (anno.imgSrc === currentImgSrc) {
+            return {
+              ...anno,
+              image_up_timestamp: now,
+            };
+          }
+          return anno;
+        });
+      } 
+      // 아직 등록된 정보가 없다면 새로 push
+      else if (!exist) {
+        return [
+          ...prev,
+          {
+            imgSrc: currentImgSrc,
+            boxes: [],
+            text: '',
+            image_up_timestamp: now,
+          },
+        ];
+      }
+
+      // 이미 exist가 있고, image_up_timestamp도 있다면 그대로
+      return prev;
+    });
+  }, [currentIndex, images, setAnnotationData]);
+
   const handleMouseDown = (e) => {
     if (!containerRef.current) return;
+
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -30,6 +70,7 @@ function AnnotateScreen({
 
   const handleMouseMove = (e) => {
     if (!isDrawing || !containerRef.current) return;
+
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -42,6 +83,10 @@ function AnnotateScreen({
     setTempBox({ left, top, width, height });
   };
 
+  // ----------------------
+  // 2) 마지막 바운딩 박스가 그려졌을 때 timestamp(box_drawn_timestamp)를 저장
+  //    handleMouseUp 시점
+  // ----------------------
   const handleMouseUp = () => {
     if (!isDrawing || !tempBox || !containerRef.current) return;
     setIsDrawing(false);
@@ -53,16 +98,22 @@ function AnnotateScreen({
       w: tempBox.width,
       h: tempBox.height,
     };
+    const now = Date.now(); // box_drawn_timestamp
 
-    // 기존 annotationData 복사 후 업데이트
     setAnnotationData((prev) => {
       const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
       if (exist) {
-        return prev.map((anno) =>
-          anno.imgSrc === currentImgSrc
-            ? { ...anno, boxes: [newBox] } // 박스를 하나만 유지하는 예시
-            : anno
-        );
+        // 기존 데이터가 있으면 덮어쓰기(박스 1개만 유지 예시)
+        return prev.map((anno) => {
+          if (anno.imgSrc === currentImgSrc) {
+            return {
+              ...anno,
+              boxes: [newBox],
+              box_drawn_timestamp: now,
+            };
+          }
+          return anno;
+        });
       } else {
         // 없으면 새로 생성
         return [
@@ -70,7 +121,7 @@ function AnnotateScreen({
           {
             imgSrc: currentImgSrc,
             boxes: [newBox],
-            // text는 handleNextImage에서 추가
+            box_drawn_timestamp: now,
           },
         ];
       }
@@ -79,9 +130,15 @@ function AnnotateScreen({
     setTempBox(null);
   };
 
+  // ----------------------
+  // 3) "다음" 버튼 눌렀을 때 timestamp(next_button_timestamp)를 저장
+  //    handleNextImage 시점
+  // ----------------------
   const handleNextImage = () => {
     const currentImgSrc = images[currentIndex];
+    const now = Date.now(); // next_button_timestamp
 
+    // 텍스트 주석 + next_button_timestamp 반영
     const newAnnotationData = (() => {
       const cloned = [...annotationData];
       const index = cloned.findIndex((anno) => anno.imgSrc === currentImgSrc);
@@ -90,24 +147,26 @@ function AnnotateScreen({
         cloned[index] = {
           ...cloned[index],
           text: textInput,
+          next_button_timestamp: now,
         };
       } else {
         cloned.push({
           imgSrc: currentImgSrc,
           boxes: [],
           text: textInput,
+          next_button_timestamp: now,
         });
       }
-
       return cloned;
     })();
 
-
+    // 최신값으로 갱신
     setAnnotationData(newAnnotationData);
     setTextInput('');
 
-    // 마지막 이미지인지
+    // 마지막 이미지인지 체크
     if (currentIndex === images.length - 1) {
+      // 마지막이면 onFinish에 최신 데이터 넘겨주기
       onFinish(newAnnotationData);
     } else {
       setCurrentIndex((prev) => prev + 1);
@@ -137,20 +196,13 @@ function AnnotateScreen({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
         >
-          {/* <img
-            src={currentImgSrc}
-            alt={`img-${currentIndex}`}
-            style={{ maxWidth: '600px', maxHeight: '400px' }}
-          /> */}
           <img
             src={currentImgSrc}
             alt={`img-${currentIndex}`}
             style={{ maxWidth: '600px', height: '400px', userSelect: 'none', pointerEvents: 'none' }}
             onContextMenu={(e) => e.preventDefault()} // 우클릭 방지
-            onDragStart={(e) => e.preventDefault()} // 드래그 방지
+            onDragStart={(e) => e.preventDefault()}   // 드래그 방지
           />
-
-
 
           {/* 이미 그린 박스 표시 */}
           {existingBoxes.map((box, idx) => (
@@ -192,12 +244,9 @@ function AnnotateScreen({
       </div>
 
       <br />
-      <button onClick={handleNextImage} disabled={(existingBoxes.length !== 1)}>
+      <button onClick={handleNextImage} disabled={existingBoxes.length !== 1}>
         {currentIndex === images.length - 1 ? 'Finish' : 'Next'}
       </button>
-      {/* <button onClick={handleNextImage} disabled={(existingBoxes.length !== 1 || textInput === '')}>
-        {currentIndex === images.length - 1 ? 'Finish' : 'Next'}
-      </button> */}
     </div>
   );
 }
