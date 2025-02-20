@@ -18,11 +18,12 @@ function AnnotateScreen({
 
   const containerRef = useRef(null);
 
+  
   useEffect(() => {
     if (!images || !images[currentIndex]) return;
 
     const currentImgSrc = images[currentIndex];
-    const now = Date.now(); // or new Date().toISOString() 등 원하는 형식
+    const now = Date.now(); 
 
     setAnnotationData((prev) => {
       const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
@@ -83,10 +84,6 @@ function AnnotateScreen({
     setTempBox({ left, top, width, height });
   };
 
-  // ----------------------
-  // 2) 마지막 바운딩 박스가 그려졌을 때 timestamp(box_drawn_timestamp)를 저장
-  //    handleMouseUp 시점
-  // ----------------------
   const handleMouseUp = () => {
     if (!isDrawing || !tempBox || !containerRef.current) return;
     setIsDrawing(false);
@@ -98,7 +95,7 @@ function AnnotateScreen({
       w: tempBox.width,
       h: tempBox.height,
     };
-    const now = Date.now(); // box_drawn_timestamp
+    const now = Date.now();
 
     setAnnotationData((prev) => {
       const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
@@ -130,15 +127,10 @@ function AnnotateScreen({
     setTempBox(null);
   };
 
-  // ----------------------
-  // 3) "다음" 버튼 눌렀을 때 timestamp(next_button_timestamp)를 저장
-  //    handleNextImage 시점
-  // ----------------------
   const handleNextImage = () => {
     const currentImgSrc = images[currentIndex];
     const now = Date.now(); // next_button_timestamp
 
-    // 텍스트 주석 + next_button_timestamp 반영
     const newAnnotationData = (() => {
       const cloned = [...annotationData];
       const index = cloned.findIndex((anno) => anno.imgSrc === currentImgSrc);
