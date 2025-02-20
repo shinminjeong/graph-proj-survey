@@ -131,6 +131,7 @@ function AnnotateScreen({
     const currentImgSrc = images[currentIndex];
     const now = Date.now(); // next_button_timestamp
 
+
     const newAnnotationData = (() => {
       const cloned = [...annotationData];
       const index = cloned.findIndex((anno) => anno.imgSrc === currentImgSrc);
@@ -229,7 +230,7 @@ function AnnotateScreen({
         {/* 텍스트 입력 영역 */}
         <textarea
           style={{ width: '250px', height: '380px', fontSize: '14px', padding: '8px', resize: 'none' }}
-          placeholder="Enter your additional comments here..."
+          placeholder="Please provide a description of the region that you selected..."
           value={textInput}
           onChange={(e) => setTextInput(e.target.value)}
         />
