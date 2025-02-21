@@ -173,7 +173,7 @@ function AnnotateScreen({
   return (
     <div style={{ textAlign: 'center' }}>
       <h2>
-        Brush the most prominent region in the chart ({currentIndex + 1} / {images.length})
+        Brush the most prominent region in the chart
       </h2>
 
       <div style={{ display: 'inline-flex', gap: '20px', justifyContent: 'center' }}>
@@ -237,7 +237,7 @@ function AnnotateScreen({
       </div>
 
       <br />
-      <button onClick={handleNextImage} disabled={existingBoxes.length !== 1}>
+      <button onClick={handleNextImage} disabled={existingBoxes.length !== 1 || textInput === ''}>
         {currentIndex === images.length - 1 ? 'Finish' : 'Next'}
       </button>
     </div>
