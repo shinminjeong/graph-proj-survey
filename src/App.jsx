@@ -59,6 +59,8 @@ function App() {
 
   // 화면 전환
   const changeScreen = () => {
+    window.scrollTo(0, 0);
+
     if (screen === 'initial') {
       setScreen('demographic_survey');
     } else if (screen === 'demographic_survey') {
@@ -76,10 +78,17 @@ function App() {
   const handleFinish = async (finalData) => {
     setIsSending(true);
 
+    const browserInfo = {
+        userAgent: navigator.userAgent,
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+    };
+
     finalData = {
         demoData,
+        browserInfo,
         ...finalData
-    }
+    };
 
     const formBody = new URLSearchParams();
     // 실제로는 userId, demoData, annotationData를 각각 따로 append해도 되지만
