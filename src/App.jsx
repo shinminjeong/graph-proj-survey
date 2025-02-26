@@ -3,104 +3,168 @@ import React, { useState, useEffect } from 'react';
 import StartScreen from './components/StartScreen';
 import AnnotateScreen from './components/AnnotateScreen';
 import EndScreen from './components/EndScreen';
+import InitialScreen from './components/InitialScreen';
+import DemoGraphicSurveyScreen from './components/DemoGraphicSurveyScreen';
+import TutorialIntroScreen from './components/TutorialIntroScreen';
+import TutorialScreen from './components/TutorialScreen';
 
 function App() {
-    const [screen, setScreen] = useState('start'); // 'start' -> 'annotate' -> 'end'
-    const [annotationData, setAnnotationData] = useState([]);
-    const [imagesToAnnotate, setImagesToAnnotate] = useState([]);
-    const [isSending, setIsSending] = useState(false); // 전송 중 여부
+  // 화면 전환
+  const [screen, setScreen] = useState('initial');
 
-    const [userId, setUserId] = useState('');
+  // 데모 설문 데이터 (DemoGraphicSurveyScreen에서 입력한 내용)
+  const [demoData, setDemoData] = useState(null);
 
-    const base = import.meta.env.BASE_URL;
-    const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', {
-        eager: true
-    });
+  // 어노테이션 데이터
+  const [annotationData, setAnnotationData] = useState([]);
 
-    const wholeImages = Object.values(images).map((module) => module.default);
+  // 이미지
+  const [imagesToAnnotate, setImagesToAnnotate] = useState([]);
+  const [imagesForExamples, setImagesForExamples] = useState([]);
 
-    const getRandomImages = (wholeImages, count = 5) => {
-        const shuffled = [...wholeImages].sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, count);
-    };
+  const [isSending, setIsSending] = useState(false);
+  const [userId, setUserId] = useState('');
 
-    useEffect(() => {
-        if (wholeImages.length > 0) {
-            setImagesToAnnotate(getRandomImages(wholeImages));
-        }
-    }, []);
+  // 실제 실험용 이미지
+  const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', {
+    eager: true,
+  });
+  // 튜토리얼용 예시 이미지
+  const exampleImages = import.meta.glob('/src/assets/examples/*.{png,jpg,jpeg,svg}', {
+    eager: true,
+  });
 
-    // 구글 Apps Script 웹 앱 URL (배포 후 발급받은 URL)
-    const WEB_APP_URL =
-        'https://script.google.com/macros/s/AKfycbyN50ItId7fBzUh9o3dmdePHUikxQOlT_qHZJiAKz14uUfpQnHCag0PGtInV65v8ODq/exec';
+  const wholeImages = Object.values(images).map((module) => module.default);
 
+  // 튜토리얼 예시 이미지를 파일명으로 정렬
+  const sortedExampleImages = Object.keys(exampleImages)
+    .sort()
+    .map((key) => exampleImages[key].default);
 
-    const handleStart = () => {
-        setScreen('annotate');
-    };
+  const getRandomImages = (whole, count = 5) => {
+    const shuffled = [...whole].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
 
-    const handleFinish = async (finalData) => {
-        setIsSending(true);
-      
-        const formBody = new URLSearchParams();
-        formBody.append('userId', userId);
-      
-        console.log(JSON.stringify(finalData));
-        formBody.append('annotationData', JSON.stringify(finalData));
-      
-        try {
-          const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            },
-            body: formBody.toString(),
-          });
-      
-          const result = await response.json();
-          console.log('Google Script response:', result);
-      
-          setIsSending(false);
-          setScreen('end');
-        } catch (err) {
-          console.error('Error sending data to Google Sheets:', err);
-          alert('Failed to send data.');
-          setIsSending(false);
-        }
-      };
+  useEffect(() => {
+    if (wholeImages.length > 0) {
+      setImagesToAnnotate(getRandomImages(wholeImages));
+    }
+    setImagesForExamples(sortedExampleImages);
+  }, []);
 
+  // 구글 Apps Script URL
+  const WEB_APP_URL =
+    'https://script.google.com/macros/s/AKfycbyN50ItId7fBzUh9o3dmdePHUikxQOlT_qHZJiAKz14uUfpQnHCag0PGtInV65v8ODq/exec';
 
-    return (
-        <div className='app-container'>
-            {screen === 'start' && <StartScreen onStart={handleStart} userId={userId} setUserId={setUserId}/>}
+  // 화면 전환
+  const changeScreen = () => {
+    if (screen === 'initial') {
+      setScreen('demographic_survey');
+    } else if (screen === 'demographic_survey') {
+      setScreen('tutorial_intro');
+    } else if (screen === 'tutorial_intro') {
+      setScreen('tutorial');
+    } else if (screen === 'tutorial') {
+      setScreen('annotate');
+    } else if (screen === 'start') {
+      setScreen('annotate');
+    }
+  };
 
-            {screen === 'annotate' && (
-                <>
-                    {/* isSending이 true면 ProgressBar를 AnnotateScreen 위에 표시 */}
-                    {isSending && (
-                        <div style={{ textAlign: 'center', margin: '0 auto 20px' }}>
-                            <p>Sending Data Now...</p>
-                            <progress />
-                        </div>
-                    )}
+  // 어노테이션 종료 시 구글 시트 전송
+  const handleFinish = async (finalData) => {
+    setIsSending(true);
 
-                    {!isSending && (
-                      <AnnotateScreen
-                      images={imagesToAnnotate}
-                      onFinish={handleFinish}
-                      annotationData={annotationData}
-                      setAnnotationData={setAnnotationData}
-                      />
-                    )}
+    finalData = {
+        demoData,
+        ...finalData
+    }
 
-                    
-                </>
-            )}
+    const formBody = new URLSearchParams();
+    // 실제로는 userId, demoData, annotationData를 각각 따로 append해도 되지만
+    // 한 번에 객체 전체를 JSON으로 stringify해서 전송해도 문제없음
+    // console.log('demoData:', demoData);
 
-            {screen === 'end' && <EndScreen />}
-        </div>
-    );
+    formBody.append('userId', demoData.prolificId);
+    formBody.append('annotationData', JSON.stringify(finalData));
+
+    try {
+      const response = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: formBody.toString(),
+      });
+
+      const result = await response.json();
+      console.log('Google Script response:', result);
+
+      setIsSending(false);
+      setScreen('end');
+    } catch (err) {
+      console.error('Error sending data to Google Sheets:', err);
+      alert('Failed to send data.');
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div className="app-container">
+      {screen === 'initial' && <InitialScreen onStart={changeScreen} />}
+
+      {screen === 'demographic_survey' && (
+        // DemoGraphicSurveyScreen에 setDemoData를 넘겨줌
+        <DemoGraphicSurveyScreen 
+          onNext={changeScreen} 
+          setDemoData={setDemoData} 
+        />
+      )}
+
+      {screen === 'tutorial_intro' && (
+        <TutorialIntroScreen onPracticeStart={changeScreen} />
+      )}
+
+      {screen === 'tutorial' && (
+        <TutorialScreen 
+          images={imagesForExamples} 
+          onTutorialFinish={changeScreen} 
+        />
+      )}
+
+      {screen === 'start' && (
+        <StartScreen 
+          onStart={changeScreen} 
+          userId={userId} 
+          setUserId={setUserId} 
+        />
+      )}
+
+      {screen === 'annotate' && (
+        <>
+          {isSending && (
+            <div style={{ textAlign: 'center', margin: '0 auto 20px' }}>
+              <p>Sending Data Now...</p>
+              <progress />
+            </div>
+          )}
+
+          {!isSending && (
+            <AnnotateScreen
+              images={imagesToAnnotate}
+              onFinish={handleFinish}
+              annotationData={annotationData}
+              setAnnotationData={setAnnotationData}
+            />
+          )}
+        </>
+      )}
+
+      {screen === 'end' && <EndScreen />}
+    </div>
+  );
 }
 
 export default App;

@@ -172,6 +172,9 @@ function AnnotateScreen({
 
   return (
     <div style={{ textAlign: 'center' }}>
+      <h2 style={{ textAlign: 'left', color: '#333', borderBottom: '2px solid #ddd', paddingBottom: '10px' }}>
+                Main Session
+            </h2>
       <h2>
         Brush the most prominent region in the chart
       </h2>
