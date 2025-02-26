@@ -10,7 +10,7 @@ import TutorialScreen from './components/TutorialScreen';
 
 function App() {
   // 화면 전환
-  const [screen, setScreen] = useState('initial');
+  const [screen, setScreen] = useState('initial');   // initial, demographic_survey, tutorial_intro, tutorial, start, annotate, end
 
   // 데모 설문 데이터 (DemoGraphicSurveyScreen에서 입력한 내용)
   const [demoData, setDemoData] = useState(null);
@@ -41,14 +41,13 @@ function App() {
     .sort()
     .map((key) => exampleImages[key].default);
 
-  const getRandomImages = (whole, count = 5) => {
-    const shuffled = [...whole].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
+  const getShuffledImages = (whole) => {
+    return [...whole].sort(() => Math.random() - 0.5); // 배열을 무작위로 섞음
   };
 
   useEffect(() => {
     if (wholeImages.length > 0) {
-      setImagesToAnnotate(getRandomImages(wholeImages));
+      setImagesToAnnotate(getShuffledImages(wholeImages)); // 무작위 섞은 이미지 배열 설정
     }
     setImagesForExamples(sortedExampleImages);
   }, []);
@@ -79,21 +78,21 @@ function App() {
     setIsSending(true);
 
     const browserInfo = {
-        userAgent: navigator.userAgent,
-        screenWidth: window.innerWidth,
-        screenHeight: window.innerHeight,
+      userAgent: navigator.userAgent,
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
     };
 
     finalData = {
-        demoData,
-        browserInfo,
-        ...finalData
+      demoData,
+      browserInfo,
+      ...finalData
     };
 
     const formBody = new URLSearchParams();
     // 실제로는 userId, demoData, annotationData를 각각 따로 append해도 되지만
     // 한 번에 객체 전체를 JSON으로 stringify해서 전송해도 문제없음
-    // console.log('demoData:', demoData);
+    console.log('demoData:', demoData);
 
     formBody.append('userId', demoData.prolificId);
     formBody.append('annotationData', JSON.stringify(finalData));
@@ -126,9 +125,9 @@ function App() {
 
       {screen === 'demographic_survey' && (
         // DemoGraphicSurveyScreen에 setDemoData를 넘겨줌
-        <DemoGraphicSurveyScreen 
-          onNext={changeScreen} 
-          setDemoData={setDemoData} 
+        <DemoGraphicSurveyScreen
+          onNext={changeScreen}
+          setDemoData={setDemoData}
         />
       )}
 
@@ -137,17 +136,17 @@ function App() {
       )}
 
       {screen === 'tutorial' && (
-        <TutorialScreen 
-          images={imagesForExamples} 
-          onTutorialFinish={changeScreen} 
+        <TutorialScreen
+          images={imagesForExamples}
+          onTutorialFinish={changeScreen}
         />
       )}
 
       {screen === 'start' && (
-        <StartScreen 
-          onStart={changeScreen} 
-          userId={userId} 
-          setUserId={setUserId} 
+        <StartScreen
+          onStart={changeScreen}
+          userId={userId}
+          setUserId={setUserId}
         />
       )}
 

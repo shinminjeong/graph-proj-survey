@@ -58,14 +58,14 @@ function InitialScreen({onStart}) {
         <li>You violate any prohibited actions listed above.</li>
       </ul>
 
-      <h4 style={{ color: '#f0ad4e' }}>🟠 Partial / Prorated Compensation (Amount TBD) if:</h4>
+      <h4 style={{ color: '#f0ad4e' }}>🟠 Partial / Prorated Compensation if:</h4>
       <ul style={{ paddingLeft: '20px', color: '#555' }}>
         <li>You remain idle for too long.</li>
         <li>Your response contains non-English characters.</li>
         <li>You submit inappropriate responses (e.g., random characters, irrelevant text).</li>
       </ul>
 
-      <h4 style={{ color: '#5cb85c' }}>🟢 Full Compensation (Amount TBD) if:</h4>
+      <h4 style={{ color: '#5cb85c' }}>🟢 Full Compensation if:</h4>
       <ul style={{ paddingLeft: '20px', color: '#555' }}>
         <li>You complete all tasks without violating any rules above.</li>
       </ul>

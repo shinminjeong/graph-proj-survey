@@ -26,12 +26,12 @@ function TutorialIntroScreen({ onPracticeStart }) {
             </div>
 
             {/* For Bar Charts */}
-            <h3 style={{ color: '#333', marginTop: '20px' }}>For Bar Charts:</h3>
+            <h3 style={{ color: '#333', marginTop: '20px' }}>For Bar Charts 📊:</h3>
             <div style={{ marginLeft: '20px', marginTop: '10px' }}>
                 <p>
                     <strong>Title Format:</strong>
                 </p>
-                <p>"[What is measured] by [Grouping category] ([Timeframe], in [Unit])"</p>
+                <p>📌 "[What is measured] by [Grouping category] ([Timeframe], in [Unit])"</p>
                 <p>
                     <em>Example:</em> Unemployment rate by country (2023, in percentage)
                 </p>
@@ -49,12 +49,12 @@ function TutorialIntroScreen({ onPracticeStart }) {
             </div>
 
             {/* For Line Charts */}
-            <h3 style={{ color: '#333', marginTop: '20px' }}>For Line Charts:</h3>
+            <h3 style={{ color: '#333', marginTop: '20px' }}>For Line Charts 📈:</h3>
             <div style={{ marginLeft: '20px', marginTop: '10px' }}>
                 <p>
                     <strong>Title Format:</strong>
                 </p>
-                <p>"[What is measured] by [Time category] (in [Unit])"</p>
+                <p>📌 "[What is measured] by [Time category] (in [Unit])"</p>
                 <p>
                     <em>Example:</em> Stock market volatility by days since election (in index points)
                 </p>

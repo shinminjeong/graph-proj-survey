@@ -7,81 +7,39 @@ function AnnotateScreen({
   setAnnotationData,
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // 드래그 상태
   const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
-  const [tempBox, setTempBox] = useState(null); // 드래그 중 임시 박스
-
-  // 텍스트 입력
+  const [tempBox, setTempBox] = useState(null);
   const [textInput, setTextInput] = useState('');
+  const [imgHeight, setImgHeight] = useState(380); // 기본 높이 설정
 
   const containerRef = useRef(null);
+  const imgRef = useRef(null);
 
-  
   useEffect(() => {
-    if (!images || !images[currentIndex]) return;
-
-    const currentImgSrc = images[currentIndex];
-    const now = Date.now(); 
-
-    setAnnotationData((prev) => {
-      const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
-
-      // 이미 이 이미지에 대한 정보가 있고, image_up_timestamp가 없다면 추가
-      if (exist && !exist.image_up_timestamp) {
-        return prev.map((anno) => {
-          if (anno.imgSrc === currentImgSrc) {
-            return {
-              ...anno,
-              image_up_timestamp: now,
-            };
-          }
-          return anno;
-        });
-      } 
-      // 아직 등록된 정보가 없다면 새로 push
-      else if (!exist) {
-        return [
-          ...prev,
-          {
-            imgSrc: currentImgSrc,
-            boxes: [],
-            text: '',
-            image_up_timestamp: now,
-          },
-        ];
-      }
-
-      // 이미 exist가 있고, image_up_timestamp도 있다면 그대로
-      return prev;
-    });
-  }, [currentIndex, images, setAnnotationData]);
+    if (imgRef.current) {
+      setImgHeight(imgRef.current.naturalHeight);
+    }
+  }, [currentIndex]); // 이미지 변경 시 높이 업데이트
 
   const handleMouseDown = (e) => {
     if (!containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
     setIsDrawing(true);
-    setStartPoint({ x, y });
+    setStartPoint({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   };
 
   const handleMouseMove = (e) => {
     if (!isDrawing || !containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const left = Math.min(startPoint.x, x);
-    const top = Math.min(startPoint.y, y);
-    const width = Math.abs(x - startPoint.x);
-    const height = Math.abs(y - startPoint.y);
-
-    setTempBox({ left, top, width, height });
+    setTempBox({
+      left: Math.min(startPoint.x, e.clientX - rect.left),
+      top: Math.min(startPoint.y, e.clientY - rect.top),
+      width: Math.abs(e.clientX - rect.left - startPoint.x),
+      height: Math.abs(e.clientY - rect.top - startPoint.y),
+    });
   };
 
   const handleMouseUp = () => {
@@ -95,32 +53,15 @@ function AnnotateScreen({
       w: tempBox.width,
       h: tempBox.height,
     };
-    const now = Date.now();
 
     setAnnotationData((prev) => {
       const exist = prev.find((anno) => anno.imgSrc === currentImgSrc);
       if (exist) {
-        // 기존 데이터가 있으면 덮어쓰기(박스 1개만 유지 예시)
-        return prev.map((anno) => {
-          if (anno.imgSrc === currentImgSrc) {
-            return {
-              ...anno,
-              boxes: [newBox],
-              box_drawn_timestamp: now,
-            };
-          }
-          return anno;
-        });
+        return prev.map((anno) =>
+          anno.imgSrc === currentImgSrc ? { ...anno, boxes: [newBox] } : anno
+        );
       } else {
-        // 없으면 새로 생성
-        return [
-          ...prev,
-          {
-            imgSrc: currentImgSrc,
-            boxes: [newBox],
-            box_drawn_timestamp: now,
-          },
-        ];
+        return [...prev, { imgSrc: currentImgSrc, boxes: [newBox] }];
       }
     });
 
@@ -128,39 +69,10 @@ function AnnotateScreen({
   };
 
   const handleNextImage = () => {
-    const currentImgSrc = images[currentIndex];
-    const now = Date.now(); // next_button_timestamp
-
-
-    const newAnnotationData = (() => {
-      const cloned = [...annotationData];
-      const index = cloned.findIndex((anno) => anno.imgSrc === currentImgSrc);
-
-      if (index !== -1) {
-        cloned[index] = {
-          ...cloned[index],
-          text: textInput,
-          next_button_timestamp: now,
-        };
-      } else {
-        cloned.push({
-          imgSrc: currentImgSrc,
-          boxes: [],
-          text: textInput,
-          next_button_timestamp: now,
-        });
-      }
-      return cloned;
-    })();
-
-    // 최신값으로 갱신
-    setAnnotationData(newAnnotationData);
     setTextInput('');
 
-    // 마지막 이미지인지 체크
     if (currentIndex === images.length - 1) {
-      // 마지막이면 onFinish에 최신 데이터 넘겨주기
-      onFinish(newAnnotationData);
+      onFinish(annotationData);
     } else {
       setCurrentIndex((prev) => prev + 1);
     }
@@ -173,13 +85,11 @@ function AnnotateScreen({
   return (
     <div style={{ textAlign: 'center' }}>
       <h2 style={{ textAlign: 'left', color: '#333', borderBottom: '2px solid #ddd', paddingBottom: '10px' }}>
-                Main Session
-            </h2>
-      <h2>
-        Brush the most prominent region in the chart
+        Main Session
       </h2>
+      <h2>Brush the most prominent region in the chart</h2>
 
-      <div style={{ display: 'inline-flex', gap: '20px', justifyContent: 'center' }}>
+      <div style={{ display: 'inline-flex', gap: '20px', justifyContent: 'center', alignItems: 'start' }}>
         {/* 이미지 + 박스 영역 */}
         <div
           ref={containerRef}
@@ -193,11 +103,18 @@ function AnnotateScreen({
           onMouseUp={handleMouseUp}
         >
           <img
+            ref={imgRef}
             src={currentImgSrc}
             alt={`img-${currentIndex}`}
-            style={{ maxWidth: '600px', height: '400px', userSelect: 'none', pointerEvents: 'none' }}
-            onContextMenu={(e) => e.preventDefault()} // 우클릭 방지
-            onDragStart={(e) => e.preventDefault()}   // 드래그 방지
+            style={{
+              width: 'auto',
+              height: 'auto',
+              userSelect: 'none',
+              pointerEvents: 'none'
+            }}
+            onLoad={(e) => setImgHeight(e.target.naturalHeight)} // 이미지 로드 후 높이 설정
+            onContextMenu={(e) => e.preventDefault()}
+            onDragStart={(e) => e.preventDefault()}
           />
 
           {/* 이미 그린 박스 표시 */}
@@ -230,19 +147,68 @@ function AnnotateScreen({
           )}
         </div>
 
-        {/* 텍스트 입력 영역 */}
+        {/* 텍스트 입력 영역 (이미지 높이에 맞추기) */}
         <textarea
-          style={{ width: '250px', height: '380px', fontSize: '14px', padding: '8px', resize: 'none' }}
-          placeholder="Please provide a description of the region that you selected..."
+          style={{
+            width: '250px',
+            height: `${imgHeight * 0.9}px`, // 이미지 높이와 동일하게 설정
+            fontSize: '14px',
+            padding: '8px',
+            resize: 'none'
+          }}
+          placeholder="Please provide a description of the region that you selected."
           value={textInput}
           onChange={(e) => setTextInput(e.target.value)}
         />
       </div>
 
       <br />
-      <button onClick={handleNextImage} disabled={existingBoxes.length !== 1 || textInput === ''}>
+      {/* <button
+        style={{
+          marginBottom: '30px',
+        }}
+        onClick={handleNextImage}
+        disabled={existingBoxes.length !== 1 || textInput === ''}
+      >
+        {currentIndex === images.length - 1 ? 'Finish' : 'Next'}
+      </button> */}
+      <button
+        style={{
+          marginBottom: '30px',
+          padding: '12px 24px',
+          fontSize: currentIndex === images.length - 1 ? '18px' : '16px', // Finish 버튼 크기 증가
+          fontWeight: 'bold',
+          backgroundColor: currentIndex === images.length - 1 ? '#28a745' : '#6c757d', // Finish: 초록색, Next: 회색
+          color: 'white',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: existingBoxes.length !== 1 || textInput === '' ? 'not-allowed' : 'pointer',
+          opacity: existingBoxes.length !== 1 || textInput === '' ? 0.5 : 1, // 비활성화 시 흐리게 표시
+          transition: 'background-color 0.3s ease, transform 0.2s ease',
+        }}
+        onClick={handleNextImage}
+        disabled={existingBoxes.length !== 1 || textInput === ''}
+        onMouseEnter={(e) => {
+          if (currentIndex === images.length - 1) {
+            e.target.style.backgroundColor = '#218838'; // Finish 버튼: 진한 초록색
+          } else {
+            e.target.style.backgroundColor = '#5a6268'; // Next 버튼: 진한 회색
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (currentIndex === images.length - 1) {
+            e.target.style.backgroundColor = '#28a745'; // Finish 버튼: 원래 초록색
+          } else {
+            e.target.style.backgroundColor = '#6c757d'; // Next 버튼: 원래 회색
+          }
+        }}
+      >
         {currentIndex === images.length - 1 ? 'Finish' : 'Next'}
       </button>
+
+
+
+
     </div>
   );
 }
