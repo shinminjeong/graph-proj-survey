@@ -207,7 +207,7 @@ function AnnotateScreen({
         }}
       >
         {/* <p style={{ margin: 0, fontWeight: 'bold' }}>Training Session</p> */}
-        <p style={{ margin: 0, fontWeight: 'bold' }}>Brush the most prominent region in the chart</p>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>Brush the most prominent region in the chart ({currentIndex + 1} / {images.length})</p>
       </div>
 
       {/* 이미지 영역 */}
