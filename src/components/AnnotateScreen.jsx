@@ -184,9 +184,9 @@ function AnnotateScreen({
   return (
     <div style={{ textAlign: 'center' }}>
       <h2 style={{ textAlign: 'left', color: '#333', borderBottom: '2px solid #ddd', paddingBottom: '10px' }}>
-        Main Session
+        Brush the most prominent region in the chart
       </h2>
-      <h2>Brush the most prominent region in the chart</h2>
+
 
       <div style={{ display: 'inline-flex', gap: '20px', justifyContent: 'center', alignItems: 'start' }}>
         {/* 이미지 + 박스 영역 */}
