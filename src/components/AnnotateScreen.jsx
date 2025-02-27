@@ -193,6 +193,7 @@ function AnnotateScreen({
         lineHeight: '1.6',
         color: '#555',
         height: '100%',
+        justifyContent: 'center'
       }}
     >
       {/* 상단 텍스트 영역 (이미지 바로 위) */}
