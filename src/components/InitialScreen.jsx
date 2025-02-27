@@ -49,6 +49,7 @@ function InitialScreen({onStart}) {
         <li>Opening a new tab or window.</li>
         <li>Using an unauthorized device (e.g., smartphone, tablet).</li>
         <li>Resizing your screen or changing display settings during the survey.</li>
+        <li>Quitting the survey before completing all tasks. (If you exit early, your responses will not be collected, and you will not receive compensation.)</li>
       </ul>
 
       <h3 style={{ color: '#228B22', marginTop: '20px' }}>💰 Compensation Policy</h3>

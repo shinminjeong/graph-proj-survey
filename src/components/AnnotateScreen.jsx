@@ -182,98 +182,143 @@ function AnnotateScreen({
   const existingBoxes = currentAnno?.boxes || [];
 
   return (
-    <div style={{ textAlign: 'center' }}>
-      <h4 style={{ textAlign: 'left', color: '#333', borderBottom: '2px solid #ddd', paddingBottom: '10px' }}>
-        Brush the most prominent region in the chart
-      </h4>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column', // 세로로 나열
+        alignItems: 'center',    // 가운데 정렬
+        textAlign: 'center',
+        marginTop: '30px',
+        fontFamily: 'Arial, sans-serif',
+        lineHeight: '1.6',
+        color: '#555',
+        height: '100%',
+      }}
+    >
+      {/* 상단 텍스트 영역 (이미지 바로 위) */}
+      <div
+        style={{
+          textAlign: 'left',
+          marginBottom: '10px',
+          maxWidth: '600px', // 필요에 따라 조절
+          width: '100%',
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word',
+        }}
+      >
+        {/* <p style={{ margin: 0, fontWeight: 'bold' }}>Training Session</p> */}
+        <p style={{ margin: 0, fontWeight: 'bold' }}>Brush the most prominent region in the chart</p>
+      </div>
 
-
-      <div style={{ display: 'inline-flex', gap: '20px', justifyContent: 'center', alignItems: 'start' }}>
-        {/* 이미지 + 박스 영역 */}
-        <div
-          ref={containerRef}
+      {/* 이미지 영역 */}
+      <div
+        ref={containerRef}
+        style={{
+          position: 'relative',
+          cursor: 'crosshair',
+          marginBottom: '20px',
+          maxWidth: '600px', // 필요에 따라 조절
+          width: '100%',
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        <img
+          ref={imgRef}
+          src={currentImgSrc}
+          alt={`img-${currentIndex}`}
           style={{
-            position: 'relative',
-            display: 'inline-block',
-            cursor: 'crosshair',
+            width: '100%',      // 컨테이너에 맞춰서
+            height: 'auto',
+            userSelect: 'none',
+            pointerEvents: 'none',
+            border: "1px solid black", borderRadius: "8px" 
           }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-        >
-          <img
-            ref={imgRef}
-            src={currentImgSrc}
-            alt={`img-${currentIndex}`}
+          onLoad={(e) => setImgHeight(e.target.naturalHeight)}
+          onContextMenu={(e) => e.preventDefault()}
+          onDragStart={(e) => e.preventDefault()}
+        />
+
+        {/* 이미 그린 박스 표시 */}
+        {existingBoxes.map((box, idx) => (
+          <div
+            key={idx}
             style={{
-              width: 'auto',
-              height: 'auto',
-              userSelect: 'none',
-              pointerEvents: 'none',
+              position: 'absolute',
+              border: '2px solid red',
+              left: box.x,
+              top: box.y,
+              width: box.w,
+              height: box.h,
             }}
-            onLoad={(e) => setImgHeight(e.target.naturalHeight)}
-            onContextMenu={(e) => e.preventDefault()}
-            onDragStart={(e) => e.preventDefault()}
           />
+        ))}
 
-          {/* 이미 그린 박스 표시 */}
-          {existingBoxes.map((box, idx) => (
-            <div
-              key={idx}
-              style={{
-                position: 'absolute',
-                border: '2px solid red',
-                left: box.x,
-                top: box.y,
-                width: box.w,
-                height: box.h,
-              }}
-            />
-          ))}
+        {/* 드래그 중 임시 박스 표시 */}
+        {isDrawing && tempBox && (
+          <div
+            style={{
+              position: 'absolute',
+              border: '2px dashed blue',
+              left: tempBox.left,
+              top: tempBox.top,
+              width: tempBox.width,
+              height: tempBox.height,
+            }}
+          />
+        )}
+      </div>
 
-          {/* 드래그 중 임시 박스 표시 */}
-          {isDrawing && tempBox && (
-            <div
-              style={{
-                position: 'absolute',
-                border: '2px dashed blue',
-                left: tempBox.left,
-                top: tempBox.top,
-                width: tempBox.width,
-                height: tempBox.height,
-              }}
-            />
-          )}
-        </div>
-
-        {/* 텍스트 입력 영역 (이미지 높이에 맞추기) */}
-        <textarea
+      {/* 텍스트 입력 영역 */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          maxWidth: '600px', // 필요에 따라 조절
+          width: '100%',
+          textAlign: 'left',
+          marginBottom: '20px',
+        }}
+      >
+        <label
+          htmlFor="description"
           style={{
-            width: '250px',
-            height: `${imgHeight * 0.9}px`, // 이미지 높이 대비 90%로 설정 (필요시 조정)
+            marginBottom: '6px',
+            fontWeight: 'bold',
+            fontSize: '14px',
+          }}
+        >
+          What characteristic(s) of this region made you select it as the most prominent?
+        </label>
+        <textarea
+          id="description"
+          style={{
+            width: '100%',
+            height: '100px', // 고정 높이 (필요 시 조절 또는 동적 계산)
             fontSize: '14px',
             padding: '8px',
             resize: 'none',
+            boxSizing: 'border-box',
           }}
-          placeholder="Please provide a description of the region that you selected."
           value={textInput}
           onChange={(e) => setTextInput(e.target.value)}
         />
       </div>
 
-      <br />
+      {/* Next / Finish 버튼 */}
       <button
         style={{
           marginBottom: '30px',
           padding: '12px 24px',
-          fontSize: currentIndex === images.length - 1 ? '18px' : '16px',
+          fontSize: currentIndex === images.length - 1 ? '18px' : '16px', // 마지막 버튼 크기 증가
           fontWeight: 'bold',
-          backgroundColor: currentIndex === images.length - 1 ? '#28a745' : '#6c757d',
+          backgroundColor: currentIndex === images.length - 1 ? '#28a745' : '#6c757d', // Finish: 초록색, Next: 회색
           color: 'white',
           border: 'none',
           borderRadius: '6px',
           cursor: existingBoxes.length !== 1 || textInput === '' ? 'not-allowed' : 'pointer',
-          opacity: existingBoxes.length !== 1 || textInput === '' ? 0.5 : 1,
+          opacity: existingBoxes.length !== 1 || textInput === '' ? 0.5 : 1, // 비활성화 시 흐리게 표시
           transition: 'background-color 0.3s ease, transform 0.2s ease',
         }}
         onClick={handleNextImage}
