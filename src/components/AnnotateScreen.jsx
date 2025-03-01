@@ -139,6 +139,7 @@ function AnnotateScreen({
   // ③ Next 버튼 눌렀을 때 next_button_timestamp 저장 + text 내용 반영
   // ─────────────────────────────────────────────────────────────────────────────
   const handleNextImage = () => {
+    window.scrollTo(0, 0);
     const currentImgSrc = images[currentIndex];
     const now = Date.now(); // next_button_timestamp
 

@@ -53,6 +53,7 @@ function TutorialScreen({ images, onTutorialFinish }) {
   const handleNext = () => {
     setBoxes([]);
     setTextInput('');
+    window.scrollTo(0, 0);
 
     if (currentIndex === images.length - 1) {
       onTutorialFinish();

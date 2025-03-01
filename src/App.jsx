@@ -7,10 +7,11 @@ import InitialScreen from './components/InitialScreen';
 import DemoGraphicSurveyScreen from './components/DemoGraphicSurveyScreen';
 import TutorialIntroScreen from './components/TutorialIntroScreen';
 import TutorialScreen from './components/TutorialScreen';
+import QualificationTestScreen from './components/QualificationTestScreen';
 
 function App() {
   // 화면 전환
-  const [screen, setScreen] = useState('initial');   // initial, demographic_survey, tutorial_intro, tutorial, start, annotate, end
+  const [screen, setScreen] = useState('initial');   // initial, qualification_test, demographic_survey, tutorial_intro, tutorial, start, annotate, end
 
   // 데모 설문 데이터 (DemoGraphicSurveyScreen에서 입력한 내용)
   const [demoData, setDemoData] = useState(null);
@@ -61,6 +62,9 @@ function App() {
     window.scrollTo(0, 0);
 
     if (screen === 'initial') {
+      setScreen('qualification_test');
+    }
+    else if (screen === 'qualification_test') {
       setScreen('demographic_survey');
     } else if (screen === 'demographic_survey') {
       setScreen('tutorial_intro');
@@ -122,6 +126,8 @@ function App() {
   return (
     <div className="app-container">
       {screen === 'initial' && <InitialScreen onStart={changeScreen} />}
+
+      {screen === 'qualification_test' && <QualificationTestScreen onNext={changeScreen} />}
 
       {screen === 'demographic_survey' && (
         // DemoGraphicSurveyScreen에 setDemoData를 넘겨줌

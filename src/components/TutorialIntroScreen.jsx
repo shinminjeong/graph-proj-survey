@@ -26,7 +26,7 @@ function TutorialIntroScreen({ onPracticeStart }) {
             </div>
 
             {/* For Bar Charts */}
-            <h3 style={{ color: '#333', marginTop: '20px' }}>For Bar Charts 📊:</h3>
+            {/* <h3 style={{ color: '#333', marginTop: '20px' }}>For Bar Charts 📊:</h3>
             <div style={{ marginLeft: '20px', marginTop: '10px' }}>
                 <p>
                     <strong>Title Format:</strong>
@@ -46,10 +46,10 @@ function TutorialIntroScreen({ onPracticeStart }) {
                 <p>
                     <strong>Tip:</strong> If the bars are horizontal, swap the x and y axes when interpreting.
                 </p>
-            </div>
+            </div> */}
 
             {/* For Line Charts */}
-            <h3 style={{ color: '#333', marginTop: '20px' }}>For Line Charts 📈:</h3>
+            {/* <h3 style={{ color: '#333', marginTop: '20px' }}>For Line Charts 📈:</h3>
             <div style={{ marginLeft: '20px', marginTop: '10px' }}>
                 <p>
                     <strong>Title Format:</strong>
@@ -69,11 +69,14 @@ function TutorialIntroScreen({ onPracticeStart }) {
                 <p>
                     <strong>Tip:</strong> The x-axis labels determine the time category.
                 </p>
-            </div>
+            </div> */}
 
             {/* How to Draw a Bounding Box */}
             <h3 style={{ color: '#333', marginTop: '20px' }}>How to Draw a Bounding Box:</h3>
-            <div style={{ marginLeft: '20px', marginTop: '10px' }}>
+            <div style={{ 
+                // marginLeft: '10px', 
+                marginTop: '10px' 
+                }}>
                 <ul>
                     <li>Click and drag your mouse to draw a box around the region that stands out most to you.</li>
                     <li>You must draw the box and provide the description to proceed to the next graph.</li>
