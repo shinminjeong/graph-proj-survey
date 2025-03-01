@@ -3,7 +3,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* 전체 화면 높이 */
+  height: auto; /* 전체 화면 높이 */
   width: 100vw;  /* 전체 화면 너비 */
   text-align: center;
   /* background-color: #f8f9fa; 배경색 추가 (선택 사항) */

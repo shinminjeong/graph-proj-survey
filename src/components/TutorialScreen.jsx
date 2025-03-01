@@ -11,11 +11,16 @@ function TutorialScreen({ images, onTutorialFinish }) {
 
   const containerRef = useRef(null);
   const imgRef = useRef(null);
+  const [imgSize, setImgSize] = useState({ width: 'auto', height: 'auto' });
 
   // 이미지가 바뀔 때마다 naturalHeight 업데이트
   useEffect(() => {
     if (imgRef.current) {
-      setImgHeight(imgRef.current.naturalHeight);
+      setImgSize({
+        width: imgRef.current.naturalWidth,
+        height: imgRef.current.naturalHeight,
+      });
+      // setImgHeight(imgRef.current.naturalHeight);
     }
   }, [currentIndex]);
 
@@ -67,8 +72,8 @@ function TutorialScreen({ images, onTutorialFinish }) {
         fontFamily: 'Arial, sans-serif',
         lineHeight: '1.6',
         color: '#555',
-        height: '100%',
-        justifyContent: 'center'
+        height: 'auto',
+        justifyContent: 'center',
       }}
     >
       {/* 상단 텍스트 영역 (이미지 바로 위) */}
@@ -93,8 +98,8 @@ function TutorialScreen({ images, onTutorialFinish }) {
           position: 'relative',
           cursor: 'crosshair',
           marginBottom: '20px',
-          maxWidth: '600px', // 필요에 따라 조절
-          width: '100%',
+          // maxWidth: '600px', // 필요에 따라 조절
+          // width: '100%',
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -105,13 +110,16 @@ function TutorialScreen({ images, onTutorialFinish }) {
           src={images[currentIndex]}
           alt={`tutorial-img-${currentIndex}`}
           style={{
-            width: '100%',      // 컨테이너에 맞춰서
-            height: 'auto',
+            width: imgSize.width,
+            height: imgSize.height,
             userSelect: 'none',
             pointerEvents: 'none',
-            border: "1px solid black", borderRadius: "8px" 
+            border: "1px solid black", borderRadius: "8px"
           }}
-          onLoad={(e) => setImgHeight(e.target.naturalHeight)}
+          onLoad={(e) => setImgSize({
+            width: e.target.naturalWidth,
+            height: e.target.naturalHeight,
+          })}
           onContextMenu={(e) => e.preventDefault()}
           onDragStart={(e) => e.preventDefault()}
         />
@@ -151,8 +159,8 @@ function TutorialScreen({ images, onTutorialFinish }) {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          maxWidth: '600px', // 필요에 따라 조절
-          width: '100%',
+          // maxWidth: '600px', // 필요에 따라 조절
+          // width: '100%',
           textAlign: 'left',
           marginBottom: '20px',
         }}
@@ -170,7 +178,7 @@ function TutorialScreen({ images, onTutorialFinish }) {
         <textarea
           id="description"
           style={{
-            width: '100%', 
+            width: imgSize.width, // 이미지 너비에 맞춤
             // height: `${imgHeight * 0.3}px`, // 이미지 높이를 참고하여 세로 길이 설정
             height: '100px', // 이미지 높이를 참고하여 세로 길이 설정
             fontSize: '14px',
@@ -178,7 +186,7 @@ function TutorialScreen({ images, onTutorialFinish }) {
             resize: 'none',
             boxSizing: 'border-box', // 패딩 포함 크기 계산
           }}
-        //   placeholder="Please provide a description of the region that you selected."
+          //   placeholder="Please provide a description of the region that you selected."
           value={textInput}
           onChange={(e) => setTextInput(e.target.value)}
         />
