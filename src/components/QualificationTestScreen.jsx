@@ -111,12 +111,15 @@ function QualificationTestScreen({ onNext }) {
         style={{
           textAlign: 'center',
           marginTop: '50px',
-        //   color: 'red',
+          //   color: 'red',
           fontFamily: 'Arial, sans-serif'
         }}
       >
-        <h2>Access Denied</h2>
-        <p>Your answers are incorrect. You are not allowed to use this site any further.</p>
+        <h1>Sorry, you cannot participate in this survey.</h1>
+        <p>Unfortunately, you did not pass the qualification test, so you are not eligible to continue.</p>
+        <p>
+          We appreciate your interest and hope you can participate in future studies.
+          Thank you for your understanding.</p>
       </div>
     );
   }

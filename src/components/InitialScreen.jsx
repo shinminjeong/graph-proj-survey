@@ -1,6 +1,6 @@
 import React from 'react';
 
-function InitialScreen({onStart}) {
+function InitialScreen({ onStart }) {
   return (
     <div
       style={{
@@ -16,6 +16,10 @@ function InitialScreen({onStart}) {
       <h1 style={{ textAlign: 'left', color: '#333', borderBottom: '2px solid #ddd', paddingBottom: '10px' }}>
         📢 Introduction & Participation Guidelines
       </h1>
+      <p style={{ fontSize: '16px', color: '#555' }}>
+        This survey is intended only for participants who can interpret charts. Please note that you will not be able to proceed if you fail the qualification test at the beginning.
+      </p>
+      {/* <br/> */}
       <p style={{ fontSize: '16px', color: '#555' }}>
         This study explores how people perceive prominent regions in visualizations and has been approved by IRB (UNISTIRB-24-001-A).
       </p>

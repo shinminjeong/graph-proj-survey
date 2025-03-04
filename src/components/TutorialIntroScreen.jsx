@@ -1,4 +1,6 @@
 import React from 'react';
+import guideGif from '/src/assets/guide.gif';
+
 
 function TutorialIntroScreen({ onPracticeStart }) {
     return (
@@ -24,6 +26,16 @@ function TutorialIntroScreen({ onPracticeStart }) {
                     chart components.
                 </p>
             </div>
+
+            <div style={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
+                <img
+                    src={guideGif}
+                    alt="Chart Example"
+                    style={{ width: "60%" }}
+                />
+            </div>
+
+
 
             {/* For Bar Charts */}
             {/* <h3 style={{ color: '#333', marginTop: '20px' }}>For Bar Charts 📊:</h3>
@@ -73,10 +85,10 @@ function TutorialIntroScreen({ onPracticeStart }) {
 
             {/* How to Draw a Bounding Box */}
             <h3 style={{ color: '#333', marginTop: '20px' }}>How to Draw a Bounding Box:</h3>
-            <div style={{ 
+            <div style={{
                 // marginLeft: '10px', 
-                marginTop: '10px' 
-                }}>
+                marginTop: '10px'
+            }}>
                 <ul>
                     <li>Click and drag your mouse to draw a box around the region that stands out most to you.</li>
                     <li>You must draw the box and provide the description to proceed to the next graph.</li>
