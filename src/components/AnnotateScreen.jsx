@@ -307,6 +307,7 @@ function AnnotateScreen({
             padding: '8px',
             resize: 'none',
             boxSizing: 'border-box',
+            alignSelf: 'center',
           }}
           value={textInput}
           onChange={(e) => setTextInput(e.target.value)}
