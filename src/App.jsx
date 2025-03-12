@@ -11,7 +11,7 @@ import QualificationTestScreen from './components/QualificationTestScreen';
 
 function App() {
   // 화면 전환
-  const [screen, setScreen] = useState('annotate');   // initial, qualification_test, demographic_survey, tutorial_intro, tutorial, start, annotate, end
+  const [screen, setScreen] = useState('initial');   // initial, qualification_test, demographic_survey, tutorial_intro, tutorial, start, annotate, end
 
   // 데모 설문 데이터 (DemoGraphicSurveyScreen에서 입력한 내용)
   const [demoData, setDemoData] = useState(null);
