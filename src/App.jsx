@@ -97,7 +97,8 @@ function App() {
     fetchSixImages();
   }, []);
 
-  const IMAGE_BASE_URL = '/graph-proj-survey/src/assets/images/';
+  // const IMAGE_BASE_URL = '/graph-proj-survey/src/assets/images/';
+  const IMAGE_BASE_URL = import.meta.env.BASE_URL + 'src/assets/images/';
   const mainStudyImages = useMemo(() => {
     if (sixImages && Array.isArray(sixImages) && sixImages.length > 0) {
       // sixImages를 이용해 파일 경로 리스트 생성
