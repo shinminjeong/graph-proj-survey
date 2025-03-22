@@ -128,7 +128,7 @@ function App() {
     'https://script.google.com/macros/s/AKfycbyN50ItId7fBzUh9o3dmdePHUikxQOlT_qHZJiAKz14uUfpQnHCag0PGtInV65v8ODq/exec';
 
   const WEB_APP_URL_MAIN_STUDY =
-    'https://script.google.com/macros/s/AKfycbzMaGiPVmjCkP0noEWGJdCmInCrabi2g2LVJnP_TwIKvoQvGXgayN2kliDUn-ZEvap2/exec';
+    'https://script.google.com/macros/s/AKfycbwQG0IuCM-8-3pWLl_Y4O4b5h_JkaiPDEueENM9XhmSsm_ItnSfCVDInhWE1JAYYg_T/exec';
 
   // 화면 전환
   const changeScreen = () => {
