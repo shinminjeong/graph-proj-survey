@@ -43,6 +43,14 @@ function App() {
     eager: true,
   });
 
+  const imageMap = Object.keys(images).reduce((acc, key) => {
+    const parts = key.split('/');
+    const filename = parts[parts.length - 1]; // 예: "1.20240217_WOT430_1.png"
+    const baseName = filename.substring(0, filename.lastIndexOf('.')); // 예: "1.20240217_WOT430_1"
+    acc[baseName] = images[key].default;
+    return acc;
+  }, {});
+
   const wholeImages = Object.values(images).map((module) => module.default);
 
   // 튜토리얼 예시 이미지를 파일명으로 정렬
@@ -99,19 +107,19 @@ function App() {
 
   // const IMAGE_BASE_URL = '/graph-proj-survey/src/assets/images/';
   const IMAGE_BASE_URL = import.meta.env.BASE_URL + 'assets/';
-  console.log('IMAGE_BASE_URL:', IMAGE_BASE_URL);
   const mainStudyImages = useMemo(() => {
     if (sixImages && Array.isArray(sixImages) && sixImages.length > 0) {
-      // sixImages를 이용해 파일 경로 리스트 생성
-      const list = sixImages.map((img) => {
-        // 현재: imageName + ".png"
-        return IMAGE_BASE_URL + img.imageName + ".png";
-        // 나중에 아래와 같이 변경 가능:
-        // return IMAGE_BASE_URL + img.imageName + img.type + ".png";
-      });
-      // 리스트를 무작위 순서로 섞기 (랜덤 셔플)
+      const list = sixImages
+        .map((img) => {
+          // 서버의 sixImages의 imageName은 확장자 없이 전달된다고 가정합니다.
+          // imageMap에서 실제 URL을 lookup합니다.
+          return imageMap[img.imageName] || '';
+          // 나중에 필요시, img.imageName + img.type + ".png" 등으로 수정할 수 있습니다.
+        })
+        .filter((url) => url !== '');
       return list.sort(() => Math.random() - 0.5);
     }
+    // sixImages가 없으면 기본 이미지 배열(imagesToAnnotate)을 사용
     return imagesToAnnotate;
   }, [sixImages, imagesToAnnotate]);
 
@@ -127,8 +135,8 @@ function App() {
     window.scrollTo(0, 0);
 
     if (screen === 'initial') {
-      setScreen('qualification_test');
-      // setScreen('demographic_survey');
+      // setScreen('qualification_test');
+      setScreen('demographic_survey');
     }
     else if (screen === 'qualification_test') {
       setScreen('demographic_survey');
