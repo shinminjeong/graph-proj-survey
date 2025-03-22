@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import StartScreen from './components/StartScreen';
 import AnnotateScreen from './components/AnnotateScreen';
 import EndScreen from './components/EndScreen';
@@ -8,10 +8,14 @@ import DemoGraphicSurveyScreen from './components/DemoGraphicSurveyScreen';
 import TutorialIntroScreen from './components/TutorialIntroScreen';
 import TutorialScreen from './components/TutorialScreen';
 import QualificationTestScreen from './components/QualificationTestScreen';
+import MainStudyScreen from './components/MainStudyScreen';
 
 function App() {
-  // 화면 전환
-  const [screen, setScreen] = useState('initial');   // initial, qualification_test, demographic_survey, tutorial_intro, tutorial, start, annotate, end
+  // 화면 전환 Bounding Box
+  // const [screen, setScreen] = useState('annotate');   // initial, qualification_test, demographic_survey, tutorial_intro, tutorial, annotate, end  -- start는 제외
+
+  // 화면 전환 Main Study
+  const [screen, setScreen] = useState('initial');   // initial, qualification_test, demographic_survey, tutorial_intro, tutorial, main_study, end  -- start는 제외
 
   // 데모 설문 데이터 (DemoGraphicSurveyScreen에서 입력한 내용)
   const [demoData, setDemoData] = useState(null);
@@ -25,6 +29,10 @@ function App() {
 
   const [isSending, setIsSending] = useState(false);
   const [userId, setUserId] = useState('');
+
+  // 6개 이미지 정보 서버로부터 받기
+  const [sixImages, setSixImages] = useState(null);
+  const [error, setError] = useState(null);
 
   // 실제 실험용 이미지
   const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', {
@@ -44,34 +52,87 @@ function App() {
 
   const getShuffledImages = (whole) => {
     return [...whole].sort(() => Math.random() - 0.5); // 배열을 무작위로 섞음
-  };
+  }
 
   useEffect(() => {
     if (wholeImages.length > 0) {
       setImagesToAnnotate(getShuffledImages(wholeImages)); // 무작위 섞은 이미지 배열 설정
     }
     setImagesForExamples(sortedExampleImages);
+
+
+    // 서버로부터 6개 이미지 정보 받기
+    async function fetchSixImages() {
+      try {
+        const response = await fetch(WEB_APP_URL_MAIN_STUDY, {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          },
+          // 서버에서 POST 요청 구분 가능하게 request type 지정
+          body: JSON.stringify({
+            requestType: "getSixImages"
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+          // data.images에는 [{ imageName, type }, ...] 형식으로 6개(혹은 그 이하)의 이미지 정보가 있음
+          setSixImages(data.images);
+          console.log('Fetched images:', data);
+        } else if (data.status === 'done') {
+          setError("더 이상 보여줄 이미지가 없습니다.");
+        } else if (data.error) {
+          setError(data.error);
+        } else {
+          setError("알 수 없는 에러가 발생했습니다.");
+        }
+      } catch (err) {
+        console.error('Error fetching images:', err);
+        setError("서버 요청 에러");
+      }
+    }
+    fetchSixImages();
   }, []);
+
+  const IMAGE_BASE_URL = '/graph-proj-survey/src/assets/images/';
+  const mainStudyImages = useMemo(() => {
+    if (sixImages && Array.isArray(sixImages) && sixImages.length > 0) {
+      return sixImages.map((img) => {
+        // 현재: imageName + ".png"
+        return IMAGE_BASE_URL + img.imageName + ".png";
+        // 나중에 아래와 같이 변경 가능:
+        // return IMAGE_BASE_URL + img.imageName + img.type + ".png";
+      });
+    }
+    return imagesToAnnotate;
+  }, [sixImages, imagesToAnnotate]);
 
   // 구글 Apps Script URL
   const WEB_APP_URL =
     'https://script.google.com/macros/s/AKfycbyN50ItId7fBzUh9o3dmdePHUikxQOlT_qHZJiAKz14uUfpQnHCag0PGtInV65v8ODq/exec';
+
+  const WEB_APP_URL_MAIN_STUDY =
+    'https://script.google.com/macros/s/AKfycbzMaGiPVmjCkP0noEWGJdCmInCrabi2g2LVJnP_TwIKvoQvGXgayN2kliDUn-ZEvap2/exec';
 
   // 화면 전환
   const changeScreen = () => {
     window.scrollTo(0, 0);
 
     if (screen === 'initial') {
-      setScreen('qualification_test');
+      // setScreen('qualification_test');
+      setScreen('demographic_survey');
     }
     else if (screen === 'qualification_test') {
       setScreen('demographic_survey');
     } else if (screen === 'demographic_survey') {
-      setScreen('tutorial_intro');
+      setScreen('main_study');
     } else if (screen === 'tutorial_intro') {
       setScreen('tutorial');
     } else if (screen === 'tutorial') {
-      setScreen('annotate');
+      setScreen('main_study');
     } else if (screen === 'start') {
       setScreen('annotate');
     }
@@ -123,6 +184,110 @@ function App() {
     }
   };
 
+  // const handleFinishMainStudy = async (finalData) => {
+  //   setIsSending(true);
+
+  //   const browserInfo = {
+  //     userAgent: navigator.userAgent,
+  //     screenWidth: window.innerWidth,
+  //     screenHeight: window.innerHeight,
+  //   };
+
+  //   finalData = {
+  //     demoData,
+  //     browserInfo,
+  //     ...finalData,
+  //   };
+
+  //   const formBody = new URLSearchParams();
+  //   // 실제로는 userId, demoData, annotationData를 각각 따로 append해도 되지만
+  //   // 한 번에 객체 전체를 JSON으로 stringify해서 전송해도 문제없음
+  //   console.log('demoData:', demoData);
+
+  //   formBody.append('userId', demoData.prolificId);
+  //   formBody.append('annotationData', JSON.stringify(finalData));
+
+  //   try {
+  //     const response = await fetch(WEB_APP_URL_MAIN_STUDY, {
+  //       method: 'POST',
+  //       mode: 'cors',
+  //       headers: {
+  //         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+  //       },
+  //       body: formBody.toString(),
+  //     });
+
+  //     const result = await response.json();
+  //     console.log('Google Script response:', result);
+
+  //     setIsSending(false);
+  //     setScreen('end');
+  //   } catch (err) {
+  //     console.error('Error sending data to Google Sheets:', err);
+  //     alert('Failed to send data.');
+  //     setIsSending(false);
+  //   }
+  // }
+
+  const handleFinishMainStudy = async (finalData) => {
+    setIsSending(true);
+
+    const browserInfo = {
+      userAgent: navigator.userAgent,
+      screenWidth: window.innerWidth,
+      screenHeight: window.innerHeight,
+    };
+
+    finalData = {
+      requestType: "updateImageCounts",
+      demoData,
+      browserInfo,
+      sixImages,
+      ...finalData,
+    };
+
+    const formBody = new URLSearchParams();
+    // 실제로는 userId, demoData, annotationData를 각각 따로 append해도 되지만
+    // 한 번에 객체 전체를 JSON으로 stringify해서 전송해도 문제없음
+    console.log('demoData:', demoData);
+
+    formBody.append('userId', demoData.prolificId);
+    formBody.append('annotationData', JSON.stringify(finalData));
+
+    const dataToSend = {
+      requestType: "updateImageCounts",
+      userId: demoData.prolificId,                // ⬅️ 따로 추출
+      annotationData: finalData,                  // ⬅️ 실제 실험 결과
+      demoData,                                   // 추가 정보
+      browserInfo,                                // 브라우저 정보
+      sixImages,                                  // 어떤 이미지 썼는지 (감소 대상)
+    };
+
+    try {
+      const response = await fetch(WEB_APP_URL_MAIN_STUDY, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        // body: formBody.toString(),
+        body: JSON.stringify(dataToSend),
+      });
+      
+
+      const result = await response.json();
+      console.log('Google Script response:', result);
+
+      setIsSending(false);
+      setScreen('end');
+    } catch (err) {
+      console.error('Error sending data to Google Sheets:', err);
+      alert('Failed to send data.');
+      setIsSending(false);
+    }
+  }
+
+
   return (
     <div className="app-container">
       {screen === 'initial' && <InitialScreen onStart={changeScreen} />}
@@ -169,6 +334,29 @@ function App() {
             <AnnotateScreen
               images={imagesToAnnotate}
               onFinish={handleFinish}
+              annotationData={annotationData}
+              setAnnotationData={setAnnotationData}
+            />
+          )}
+        </>
+      )}
+
+      {screen === 'main_study' && (
+        <>
+          {isSending && (
+            <div style={{ textAlign: 'center', margin: '0 auto 20px' }}>
+              <p>Sending Data Now...</p>
+              <progress />
+            </div>
+          )}
+
+          {!isSending && (
+            <MainStudyScreen
+              // images={imagesToAnnotate}
+              // 만약 sixImages가 있으면, 각 객체의 imageName에 ".png"를 붙여 전달합니다.
+              // 나중에 sixImages의 type도 포함해 "img.imageName + img.type + '.png'"로 변경할 수 있습니다.
+              images={mainStudyImages}
+              onFinish={handleFinishMainStudy}
               annotationData={annotationData}
               setAnnotationData={setAnnotationData}
             />
