@@ -135,8 +135,8 @@ function App() {
     window.scrollTo(0, 0);
 
     if (screen === 'initial') {
-      // setScreen('qualification_test');
-      setScreen('demographic_survey');
+      setScreen('qualification_test');
+      // setScreen('demographic_survey');
     }
     else if (screen === 'qualification_test') {
       setScreen('demographic_survey');
