@@ -100,12 +100,15 @@ function App() {
   const IMAGE_BASE_URL = '/graph-proj-survey/src/assets/images/';
   const mainStudyImages = useMemo(() => {
     if (sixImages && Array.isArray(sixImages) && sixImages.length > 0) {
-      return sixImages.map((img) => {
+      // sixImages를 이용해 파일 경로 리스트 생성
+      const list = sixImages.map((img) => {
         // 현재: imageName + ".png"
         return IMAGE_BASE_URL + img.imageName + ".png";
         // 나중에 아래와 같이 변경 가능:
         // return IMAGE_BASE_URL + img.imageName + img.type + ".png";
       });
+      // 리스트를 무작위 순서로 섞기 (랜덤 셔플)
+      return list.sort(() => Math.random() - 0.5);
     }
     return imagesToAnnotate;
   }, [sixImages, imagesToAnnotate]);
@@ -122,8 +125,8 @@ function App() {
     window.scrollTo(0, 0);
 
     if (screen === 'initial') {
-      // setScreen('qualification_test');
-      setScreen('demographic_survey');
+      setScreen('qualification_test');
+      // setScreen('demographic_survey');
     }
     else if (screen === 'qualification_test') {
       setScreen('demographic_survey');
@@ -184,50 +187,6 @@ function App() {
     }
   };
 
-  // const handleFinishMainStudy = async (finalData) => {
-  //   setIsSending(true);
-
-  //   const browserInfo = {
-  //     userAgent: navigator.userAgent,
-  //     screenWidth: window.innerWidth,
-  //     screenHeight: window.innerHeight,
-  //   };
-
-  //   finalData = {
-  //     demoData,
-  //     browserInfo,
-  //     ...finalData,
-  //   };
-
-  //   const formBody = new URLSearchParams();
-  //   // 실제로는 userId, demoData, annotationData를 각각 따로 append해도 되지만
-  //   // 한 번에 객체 전체를 JSON으로 stringify해서 전송해도 문제없음
-  //   console.log('demoData:', demoData);
-
-  //   formBody.append('userId', demoData.prolificId);
-  //   formBody.append('annotationData', JSON.stringify(finalData));
-
-  //   try {
-  //     const response = await fetch(WEB_APP_URL_MAIN_STUDY, {
-  //       method: 'POST',
-  //       mode: 'cors',
-  //       headers: {
-  //         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-  //       },
-  //       body: formBody.toString(),
-  //     });
-
-  //     const result = await response.json();
-  //     console.log('Google Script response:', result);
-
-  //     setIsSending(false);
-  //     setScreen('end');
-  //   } catch (err) {
-  //     console.error('Error sending data to Google Sheets:', err);
-  //     alert('Failed to send data.');
-  //     setIsSending(false);
-  //   }
-  // }
 
   const handleFinishMainStudy = async (finalData) => {
     setIsSending(true);
