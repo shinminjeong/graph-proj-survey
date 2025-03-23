@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function DemoGraphicSurveyScreen({ onNext, setDemoData }) {
+function DemoGraphicSurveyScreen({ onNext, setDemoData, isFetchingImages }) {
     const [formData, setFormData] = useState({
         prolificId: "",
         age: "",
@@ -192,9 +192,9 @@ function DemoGraphicSurveyScreen({ onNext, setDemoData }) {
             <div style={{ textAlign: "center", marginTop: "30px", marginBottom: "50px", paddingBottom: "50px" }}>
                 <button
                     onClick={handleNext}
-                    disabled={!isFormValid}
+                    disabled={!isFormValid || isFetchingImages}
                 >
-                    Next
+                    {isFetchingImages ? "Loading Images..." : "Next"}
                 </button>
             </div>
         </div>

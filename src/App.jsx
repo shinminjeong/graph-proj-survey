@@ -33,6 +33,7 @@ function App() {
   // 6개 이미지 정보 서버로부터 받기
   const [sixImages, setSixImages] = useState(null);
   const [error, setError] = useState(null);
+  const [isFetchingImages, setIsFetchingImages] = useState(false);
 
   // 실제 실험용 이미지
   const images = import.meta.glob('/src/assets/images/*.{png,jpg,jpeg,svg}', {
@@ -65,6 +66,7 @@ function App() {
   // 서버로부터 6개 이미지 정보 받기
   async function fetchSixImages() {
     try {
+      setIsFetchingImages(true);  
       const response = await fetch(WEB_APP_URL_MAIN_STUDY, {
         method: 'POST',
         mode: 'cors',
@@ -93,6 +95,8 @@ function App() {
     } catch (err) {
       console.error('Error fetching images:', err);
       setError("서버 요청 에러");
+    } finally {
+      setIsFetchingImages(false);
     }
   }
 
@@ -306,6 +310,7 @@ function App() {
         <DemoGraphicSurveyScreen
           onNext={changeScreen}
           setDemoData={setDemoData}
+          isFetchingImages={isFetchingImages}
         />
       )}
 
