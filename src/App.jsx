@@ -62,48 +62,86 @@ function App() {
     return [...whole].sort(() => Math.random() - 0.5); // 배열을 무작위로 섞음
   }
 
+  // 서버로부터 6개 이미지 정보 받기
+  async function fetchSixImages() {
+    try {
+      const response = await fetch(WEB_APP_URL_MAIN_STUDY, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        // 서버에서 POST 요청 구분 가능하게 request type 지정
+        body: JSON.stringify({
+          requestType: "getSixImages"
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        // data.images에는 [{ imageName, type }, ...] 형식으로 6개(혹은 그 이하)의 이미지 정보가 있음
+        setSixImages(data.images);
+        console.log('Fetched images:', data);
+      } else if (data.status === 'done') {
+        setError("더 이상 보여줄 이미지가 없습니다.");
+      } else if (data.error) {
+        setError(data.error);
+      } else {
+        setError("알 수 없는 에러가 발생했습니다.");
+      }
+    } catch (err) {
+      console.error('Error fetching images:', err);
+      setError("서버 요청 에러");
+    }
+  }
+
   useEffect(() => {
     if (wholeImages.length > 0) {
       setImagesToAnnotate(getShuffledImages(wholeImages)); // 무작위 섞은 이미지 배열 설정
     }
     setImagesForExamples(sortedExampleImages);
 
-
-    // 서버로부터 6개 이미지 정보 받기
-    async function fetchSixImages() {
-      try {
-        const response = await fetch(WEB_APP_URL_MAIN_STUDY, {
-          method: 'POST',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-          },
-          // 서버에서 POST 요청 구분 가능하게 request type 지정
-          body: JSON.stringify({
-            requestType: "getSixImages"
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.status === 'success') {
-          // data.images에는 [{ imageName, type }, ...] 형식으로 6개(혹은 그 이하)의 이미지 정보가 있음
-          setSixImages(data.images);
-          console.log('Fetched images:', data);
-        } else if (data.status === 'done') {
-          setError("더 이상 보여줄 이미지가 없습니다.");
-        } else if (data.error) {
-          setError(data.error);
-        } else {
-          setError("알 수 없는 에러가 발생했습니다.");
-        }
-      } catch (err) {
-        console.error('Error fetching images:', err);
-        setError("서버 요청 에러");
-      }
+    if (screen === 'demographic_survey') {
+      fetchSixImages();
     }
-    fetchSixImages();
-  }, []);
+
+    // // 서버로부터 6개 이미지 정보 받기
+    // async function fetchSixImages() {
+    //   try {
+    //     const response = await fetch(WEB_APP_URL_MAIN_STUDY, {
+    //       method: 'POST',
+    //       mode: 'cors',
+    //       headers: {
+    //         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    //       },
+    //       // 서버에서 POST 요청 구분 가능하게 request type 지정
+    //       body: JSON.stringify({
+    //         requestType: "getSixImages"
+    //       })
+    //     });
+
+    //     const data = await response.json();
+
+    //     if (data.status === 'success') {
+    //       // data.images에는 [{ imageName, type }, ...] 형식으로 6개(혹은 그 이하)의 이미지 정보가 있음
+    //       setSixImages(data.images);
+    //       console.log('Fetched images:', data);
+    //     } else if (data.status === 'done') {
+    //       setError("더 이상 보여줄 이미지가 없습니다.");
+    //     } else if (data.error) {
+    //       setError(data.error);
+    //     } else {
+    //       setError("알 수 없는 에러가 발생했습니다.");
+    //     }
+    //   } catch (err) {
+    //     console.error('Error fetching images:', err);
+    //     setError("서버 요청 에러");
+    //   }
+    // }
+    // fetchSixImages();
+    
+  }, [screen]);
 
   // const IMAGE_BASE_URL = '/graph-proj-survey/src/assets/images/';
   const IMAGE_BASE_URL = import.meta.env.BASE_URL + 'assets/';
@@ -128,7 +166,7 @@ function App() {
     'https://script.google.com/macros/s/AKfycbyN50ItId7fBzUh9o3dmdePHUikxQOlT_qHZJiAKz14uUfpQnHCag0PGtInV65v8ODq/exec';
 
   const WEB_APP_URL_MAIN_STUDY =
-    'https://script.google.com/macros/s/AKfycbwQG0IuCM-8-3pWLl_Y4O4b5h_JkaiPDEueENM9XhmSsm_ItnSfCVDInhWE1JAYYg_T/exec';
+    'https://script.google.com/macros/s/AKfycbx53CXV8_eEgN9g5t_3YLLJpLlZc0hMxzqBg9Ilfa0zPaMwBPxvypzz3dmoTA3iSJUs/exec';
 
   // 화면 전환
   const changeScreen = () => {
