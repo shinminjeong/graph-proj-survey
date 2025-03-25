@@ -156,6 +156,7 @@ function App() {
           // 서버의 sixImages의 imageName은 확장자 없이 전달된다고 가정합니다.
           // imageMap에서 실제 URL을 lookup합니다.
           return imageMap[img.imageName] || '';
+          // return imageMap[img.imageName + img.type] || '';
           // 나중에 필요시, img.imageName + img.type + ".png" 등으로 수정할 수 있습니다.
         })
         .filter((url) => url !== '');
@@ -170,7 +171,7 @@ function App() {
     'https://script.google.com/macros/s/AKfycbyN50ItId7fBzUh9o3dmdePHUikxQOlT_qHZJiAKz14uUfpQnHCag0PGtInV65v8ODq/exec';
 
   const WEB_APP_URL_MAIN_STUDY =
-    'https://script.google.com/macros/s/AKfycbzaXvxXpfxsH0YbCh_k-pFQCFiM6mpkBvkNevj_CUss65UVUOPCnKb_6SJ9pWMvT1xW/exec';
+    'https://script.google.com/macros/s/AKfycbzpRzIdfdmr-uah5K6FFAn6Pi-C3dsDB6KB-16bxk7IlykmyznQmWjbEckAQJBYGqUA/exec';
 
   // 화면 전환
   const changeScreen = () => {
