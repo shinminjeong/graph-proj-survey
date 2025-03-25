@@ -155,8 +155,8 @@ function App() {
         .map((img) => {
           // 서버의 sixImages의 imageName은 확장자 없이 전달된다고 가정합니다.
           // imageMap에서 실제 URL을 lookup합니다.
-          return imageMap[img.imageName] || '';
-          // return imageMap[img.imageName + img.type] || '';
+          // return imageMap[img.imageName] || '';
+          return imageMap[img.imageName + '_' +  img.type] || '';
           // 나중에 필요시, img.imageName + img.type + ".png" 등으로 수정할 수 있습니다.
         })
         .filter((url) => url !== '');
