@@ -151,7 +151,7 @@ function QualificationTestScreen({ onNext }) {
       </h2>
 
       <p style={{ marginBottom: '20px', textAlign: 'left' }}>
-        Select all statements that are true (there can be 0-4, inclusive):
+        Select all statements that are true (there can be 0-5, inclusive):
       </p>
 
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>

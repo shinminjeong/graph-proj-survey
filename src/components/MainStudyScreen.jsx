@@ -100,7 +100,7 @@ function MainStudyScreen({
         }}
       >
         {/* <p style={{ margin: 0, fontWeight: 'bold' }}>Training Session</p> */}
-        <p style={{ margin: 0, fontWeight: 'bold' }}>Look at the chart and answer the questions ({currentIndex + 1} / {images.length})</p>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>Look at the chart and answer the following questions ({currentIndex + 1} / {images.length})</p>
       </div>
 
       {/* 이미지 영역 (원본 크기로 표시) */}
@@ -123,6 +123,21 @@ function MainStudyScreen({
           onDragStart={(e) => e.preventDefault()}
         />
       </div>
+      
+      {/* showing text */}
+      <div
+        style={{
+          textAlign: 'left',
+          marginBottom: '10px',
+          width: imgSize.width,
+          // width: '100%',
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word',
+        }}
+      >
+        <p style={{ margin: 0, fontStyle: 'italic', fontWeight:'bold'}}>Please Write at least 50 characters for each answers</p>
+      </div>
+      
 
       {/* 텍스트 입력 영역 1 */}
       <div style={{ width: imgSize.width, marginBottom: '20px', textAlign: 'left' }}>
