@@ -135,7 +135,7 @@ function MainStudyScreen({
           overflowWrap: 'break-word',
         }}
       >
-        <p style={{ margin: 0, fontStyle: 'italic', fontWeight:'bold'}}>Please Write at least 50 characters for each answers</p>
+        <p style={{ margin: 0, fontStyle: 'italic', fontWeight:'bold'}}>Please write at least 50 characters for each answer.</p>
       </div>
       
 
