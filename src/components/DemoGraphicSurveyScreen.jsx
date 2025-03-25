@@ -194,7 +194,7 @@ function DemoGraphicSurveyScreen({ onNext, setDemoData, isFetchingImages }) {
                     onClick={handleNext}
                     disabled={!isFormValid || isFetchingImages}
                 >
-                    {isFetchingImages ? "Loading Images..." : "Next"}
+                    {isFetchingImages ? "Please Wait..." : "Next"}
                 </button>
             </div>
         </div>
