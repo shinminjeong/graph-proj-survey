@@ -288,6 +288,12 @@ function App() {
       
 
       const result = await response.json();
+
+      // 응답의 status가 success가 아니면 에러를 발생시킵니다.
+      if (result.status !== 'success') {
+        throw new Error(result.message || '서버에서 에러가 발생했습니다.');
+      }
+      
       console.log('Google Script response:', result);
 
       setIsSending(false);
