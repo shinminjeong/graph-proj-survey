@@ -1,6 +1,5 @@
 {
-  "name": "graph-proj-survey",
-  "homepage": "https://KrDmitri.github.io/graph-proj-survey",
+  "name": "personal_meme_survey",
   "private": true,
   "version": "0.0.0",
   "type": "module",

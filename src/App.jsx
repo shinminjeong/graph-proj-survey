@@ -147,7 +147,7 @@ function App() {
     
   }, [screen]);
 
-  // const IMAGE_BASE_URL = '/graph-proj-survey/src/assets/images/';
+  // const IMAGE_BASE_URL = '/personal_meme_survey/src/assets/images/';
   const IMAGE_BASE_URL = import.meta.env.BASE_URL + 'assets/';
   const mainStudyImages = useMemo(() => {
     if (sixImages && Array.isArray(sixImages) && sixImages.length > 0) {
@@ -308,7 +308,13 @@ function App() {
 
   return (
     <div className="app-container">
-      {screen === 'initial' && <InitialScreen onStart={changeScreen} />}
+      {screen === 'initial' && (
+        <InitialScreen
+          onStart={changeScreen}
+          userId={userId}
+          setUserId={setUserId}
+        />
+      )}
 
       {screen === 'qualification_test' && <QualificationTestScreen onNext={changeScreen} />}
 
