@@ -4,18 +4,18 @@ import StartScreen from './components/StartScreen';
 import AnnotateScreen from './components/AnnotateScreen';
 import EndScreen from './components/EndScreen';
 import InitialScreen from './components/InitialScreen';
-import DemoGraphicSurveyScreen from './components/DemoGraphicSurveyScreen';
-import TutorialIntroScreen from './components/TutorialIntroScreen';
-import TutorialScreen from './components/TutorialScreen';
-import QualificationTestScreen from './components/QualificationTestScreen';
+import StudyAFreeChatScreen from './components/StudyAFreeChatScreen';
+import StudyAPostChatScreen from './components/StudyAPostChatScreen';
+import StudyBEmotionRatingScreen from './components/StudyBEmotionRatingScreen';
+import StudyBReceiverScreen from './components/StudyBReceiverScreen';
+import StudyBSenderScreen from './components/StudyBSenderScreen';
 import MainStudyScreen from './components/MainStudyScreen';
 
 function App() {
-  // 화면 전환 Bounding Box
-  // const [screen, setScreen] = useState('annotate');   // initial, qualification_test, demographic_survey, tutorial_intro, tutorial, annotate, end  -- start는 제외
 
   // 화면 전환 Main Study
-  const [screen, setScreen] = useState('initial');   // initial, qualification_test, demographic_survey, tutorial_intro, tutorial, main_study, end  -- start는 제외
+  const [screen, setScreen] = useState('initial');  
+  // initial, qualification_test, study_a_free_chat, study_a_post_chat, study_b_emotion_rating, study_b_receiver, study_b_sender, tutorial_intro, tutorial, main_study, end  -- start는 제외
 
   // 데모 설문 데이터 (DemoGraphicSurveyScreen에서 입력한 내용)
   const [demoData, setDemoData] = useState(null);
@@ -109,41 +109,6 @@ function App() {
     if (screen === 'demographic_survey') {
       fetchSixImages();
     }
-
-    // // 서버로부터 6개 이미지 정보 받기
-    // async function fetchSixImages() {
-    //   try {
-    //     const response = await fetch(WEB_APP_URL_MAIN_STUDY, {
-    //       method: 'POST',
-    //       mode: 'cors',
-    //       headers: {
-    //         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-    //       },
-    //       // 서버에서 POST 요청 구분 가능하게 request type 지정
-    //       body: JSON.stringify({
-    //         requestType: "getSixImages"
-    //       })
-    //     });
-
-    //     const data = await response.json();
-
-    //     if (data.status === 'success') {
-    //       // data.images에는 [{ imageName, type }, ...] 형식으로 6개(혹은 그 이하)의 이미지 정보가 있음
-    //       setSixImages(data.images);
-    //       console.log('Fetched images:', data);
-    //     } else if (data.status === 'done') {
-    //       setError("더 이상 보여줄 이미지가 없습니다.");
-    //     } else if (data.error) {
-    //       setError(data.error);
-    //     } else {
-    //       setError("알 수 없는 에러가 발생했습니다.");
-    //     }
-    //   } catch (err) {
-    //     console.error('Error fetching images:', err);
-    //     setError("서버 요청 에러");
-    //   }
-    // }
-    // fetchSixImages();
     
   }, [screen]);
 
@@ -178,16 +143,17 @@ function App() {
     window.scrollTo(0, 0);
 
     if (screen === 'initial') {
-      setScreen('qualification_test');
-      // setScreen('demographic_survey');
-    }
-    else if (screen === 'qualification_test') {
-      setScreen('demographic_survey');
-    } else if (screen === 'demographic_survey') {
-      setScreen('main_study');
-    } else if (screen === 'tutorial_intro') {
-      setScreen('tutorial');
-    } else if (screen === 'tutorial') {
+      setScreen('study_b_emotion_rating');
+      // setScreen('study_a_free_chat');
+    } else if (screen === 'study_a_free_chat') {
+      setScreen('study_a_post_chat');
+    } else if (screen === 'study_a_post_chat') {
+      setScreen('study_b_emotion_rating');
+    } else if (screen === 'study_b_emotion_rating') {
+      setScreen('study_b_receiver');
+    } else if (screen === 'study_b_receiver') {
+      setScreen('study_b_sender');
+    } else if (screen === 'study_b_sender') {
       setScreen('main_study');
     } else if (screen === 'start') {
       setScreen('annotate');
@@ -316,7 +282,40 @@ function App() {
         />
       )}
 
-      {screen === 'qualification_test' && <QualificationTestScreen onNext={changeScreen} />}
+      {screen === 'study_a_free_chat' && (
+        <StudyAFreeChatScreen
+          onNext={changeScreen}
+          setDemoData={setDemoData}
+        />
+      )}
+
+      {screen === 'study_a_post_chat' && (
+        <StudyAPostChatScreen
+          onNext={changeScreen}
+          setDemoData={setDemoData}
+        />
+      )}
+
+      {screen === 'study_b_emotion_rating' && (
+        <StudyBEmotionRatingScreen
+          onNext={changeScreen}
+          setDemoData={setDemoData}
+        />
+      )}
+
+      {screen === 'study_b_receiver' && (
+        <StudyBReceiverScreen
+          onNext={changeScreen}
+          setDemoData={setDemoData}
+        />
+      )}
+
+      {screen === 'study_b_sender' && (
+        <StudyBSenderScreen
+          onNext={changeScreen}
+          setDemoData={setDemoData}
+        />
+      )}
 
       {screen === 'demographic_survey' && (
         // DemoGraphicSurveyScreen에 setDemoData를 넘겨줌
