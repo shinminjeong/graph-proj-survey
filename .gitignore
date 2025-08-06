@@ -8,7 +8,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+
+# .gitignore 에서 dist 제외
+# dist/
+!dist
 dist-ssr
 *.local
 
